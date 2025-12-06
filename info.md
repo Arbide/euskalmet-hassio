@@ -7,7 +7,7 @@
 ## Qué obtienes
 
 - Datos meteorológicos en tiempo real de cualquier estación de Euskalmet
-- 6 sensores meteorológicos diferentes (temperatura, humedad, viento, presión, precipitación)
+- 8 sensores meteorológicos diferentes (temperatura, humedad, velocidad del viento, velocidad máxima del viento, dirección del viento, presión, precipitación, irradiación solar)
 - Actualizaciones automáticas cada 10 minutos
 - Soporte completo para los idiomas español y euskera
 

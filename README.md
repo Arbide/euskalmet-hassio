@@ -15,9 +15,11 @@ Integración personalizada **Euskalmet** para Home Assistant que permite integra
   - Temperatura (°C)
   - Humedad (%)
   - Velocidad del viento (m/s)
+  - Velocidad máxima del viento (m/s)
   - Dirección del viento (grados)
   - Presión atmosférica (hPa)
   - Precipitación (mm)
+  - Irradiación solar (W/m²)
 - Configuración sencilla a través de la interfaz de Home Assistant
 - Actualizaciones automáticas cada 10 minutos
 - Soporte para idiomas español y euskera
@@ -80,9 +82,11 @@ La integración crea los siguientes sensores para cada estación configurada:
 | Temperature | Temperatura actual | °C |
 | Humidity | Humedad relativa | % |
 | Wind Speed | Velocidad del viento | m/s |
+| Wind Speed Max | Velocidad máxima del viento | m/s |
 | Wind Direction | Dirección del viento | grados |
 | Pressure | Presión atmosférica | hPa |
 | Precipitation | Precipitación acumulada | mm |
+| Solar Irradiance | Irradiación solar | W/m² |
 
 Cada sensor incluye atributos adicionales:
 - `station_id`: ID de la estación meteorológica
@@ -159,13 +163,15 @@ Esta es una integración no oficial. No está afiliada ni respaldada por Euskalm
 
 ### Versión 0.0.1 (Versión inicial - Beta)
 - Lanzamiento inicial en versión beta
-- Soporte para 6 sensores meteorológicos:
+- Soporte para 8 sensores meteorológicos:
   - Temperatura (°C)
   - Humedad (%)
   - Velocidad del viento (m/s)
+  - Velocidad máxima del viento (m/s)
   - Dirección del viento (grados)
   - Presión atmosférica (hPa)
   - Precipitación acumulada (mm)
+  - Irradiación solar (W/m²)
 - Configuración basada en interfaz de usuario (UI)
 - Autenticación JWT con fingerprint y clave privada PEM
 - Traducciones completas en español y euskera

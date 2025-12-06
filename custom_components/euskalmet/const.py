@@ -9,6 +9,7 @@ from homeassistant.components.sensor import (
 from homeassistant.const import (
     DEGREE,
     PERCENTAGE,
+    UnitOfIrradiance,
     UnitOfPressure,
     UnitOfSpeed,
     UnitOfTemperature,
@@ -44,9 +45,11 @@ API_SENSORS: Final = "sensors"
 SENSOR_TEMPERATURE = "temperature"
 SENSOR_HUMIDITY = "humidity"
 SENSOR_WIND_SPEED = "wind_speed"
+SENSOR_WIND_SPEED_MAX = "wind_speed_max"
 SENSOR_WIND_DIRECTION = "wind_direction"
 SENSOR_PRESSURE = "pressure"
 SENSOR_PRECIPITATION = "precipitation"
+SENSOR_IRRADIANCE = "irradiance"
 
 # Sensor definitions
 SENSOR_TYPES: Final[dict[str, dict]] = {
@@ -71,6 +74,13 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "unit": UnitOfSpeed.METERS_PER_SECOND,
         "icon": "mdi:weather-windy",
     },
+    SENSOR_WIND_SPEED_MAX: {
+        "name": "Wind Speed Max",
+        "device_class": SensorDeviceClass.WIND_SPEED,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfSpeed.METERS_PER_SECOND,
+        "icon": "mdi:weather-windy-variant",
+    },
     SENSOR_WIND_DIRECTION: {
         "name": "Wind Direction",
         "state_class": SensorStateClass.MEASUREMENT,
@@ -90,5 +100,12 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "state_class": SensorStateClass.TOTAL_INCREASING,
         "unit": UnitOfPrecipitationDepth.MILLIMETERS,
         "icon": "mdi:weather-rainy",
+    },
+    SENSOR_IRRADIANCE: {
+        "name": "Solar Irradiance",
+        "device_class": SensorDeviceClass.IRRADIANCE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfIrradiance.WATTS_PER_SQUARE_METER,
+        "icon": "mdi:white-balance-sunny",
     },
 }

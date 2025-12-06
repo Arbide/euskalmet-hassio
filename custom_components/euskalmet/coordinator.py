@@ -31,9 +31,11 @@ SENSOR_MAPPINGS = {
     "temperature": {"measureType": "measuresForAir", "measure": "temperature"},
     "humidity": {"measureType": "measuresForAir", "measure": "humidity"},
     "wind_speed": {"measureType": "measuresForWind", "measure": "mean_speed"},
+    "wind_speed_max": {"measureType": "measuresForWind", "measure": "max_speed"},
     "wind_direction": {"measureType": "measuresForWind", "measure": "mean_direction"},
     "pressure": {"measureType": "measuresForAtmosphere", "measure": "pressure"},
     "precipitation": {"measureType": "measuresForWater", "measure": "precipitation"},
+    "irradiance": {"measureType": "measuresForSun", "measure": "irradiance"},
 }
 
 
@@ -179,9 +181,11 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                 "temperature": None,
                 "humidity": None,
                 "wind_speed": None,
+                "wind_speed_max": None,
                 "wind_direction": None,
                 "pressure": None,
                 "precipitation": None,
+                "irradiance": None,
                 "last_update": datetime.now(timezone.utc).isoformat(),
             }
 

@@ -10,13 +10,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Añadido
 - Lanzamiento inicial del componente **Euskalmet** para Home Assistant
 - Integración completa con la API de Euskalmet mediante autenticación JWT
-- Soporte para 6 sensores meteorológicos:
+- Soporte para 8 sensores meteorológicos:
   - Temperatura (°C)
   - Humedad relativa (%)
   - Velocidad del viento (m/s)
+  - Velocidad máxima del viento (m/s)
   - Dirección del viento (grados)
   - Presión atmosférica (hPa)
   - Precipitación acumulada (mm)
+  - Irradiación solar (W/m²)
 - Configuración mediante interfaz de usuario (UI Config Flow)
   - Paso 1: Introducir fingerprint y clave privada PEM
   - Paso 2: Seleccionar estación meteorológica desde lista desplegable
