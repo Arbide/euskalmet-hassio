@@ -6,5 +6,5 @@
   "documentation": "https://opendata.euskadi.eus/api-euskalmet/",
   "iot_class": "cloud_polling",
   "requirements": ["aiohttp>=3.8.0", "PyJWT>=2.8.0", "cryptography>=41.0.0"],
-  "version": "0.0.1"
+  "version": "0.0.2"
 }

@@ -5,6 +5,33 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.0.2] - 2025-12-06
+
+### Añadido
+- **Sensor de velocidad máxima del viento** (Wind Speed Max)
+  - measureType: `measuresForWind`
+  - measureId: `max_speed`
+  - Unidad: m/s
+- **Sensor de irradiación solar** (Solar Irradiance)
+  - measureType: `measuresForSun`
+  - measureId: `irradiance`
+  - Unidad: W/m²
+- Archivo `logo.png` en la raíz del repositorio para HACS
+- Configuración `"filename": "logo.png"` en `hacs.json`
+- Documentación `MOSTRAR_ICONO.md` con instrucciones para visualizar el icono
+
+### Corregido
+- **SENSOR_MAPPINGS corregidos** - Los sensores ahora usan los valores correctos de la API:
+  - Temperatura: `measuresForAir/temperature` (era `measuresForAmbient/temp`)
+  - Humedad: `measuresForAir/humidity` (era `measuresForAmbient/hum`)
+  - Presión: `measuresForAtmosphere/pressure` (era `measuresForPressure/pressure`)
+  - Precipitación: `measuresForWater/precipitation` (era `measuresForRain/rain_acc`)
+- Configuración de iconos para que aparezcan correctamente en HACS
+
+### Mejorado
+- Logging detallado con nivel DEBUG para diagnosticar problemas con sensores
+- Total de **8 sensores meteorológicos** disponibles (era 6 en la versión anterior)
+
 ## [0.0.1] - 2025-12-06
 
 ### Añadido

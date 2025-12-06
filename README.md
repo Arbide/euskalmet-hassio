@@ -1,12 +1,12 @@
 # Euskalmet - Integración para Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
-![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
+![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.1.0%2B-green.svg)
 
 Integración personalizada **Euskalmet** para Home Assistant que permite integrar datos meteorológicos de Euskalmet (Servicio Vasco de Meteorología).
 
-**Versión actual:** 0.0.1 (Beta)
+**Versión actual:** 0.0.2
 
 ## Características
 
@@ -161,17 +161,27 @@ Esta es una integración no oficial. No está afiliada ni respaldada por Euskalm
 
 ## Registro de Cambios
 
-### Versión 0.0.1 (Versión inicial - Beta)
+### Versión 0.0.2 (2025-12-06)
+- **Añadido sensor de velocidad máxima del viento** (Wind Speed Max)
+- **Añadido sensor de irradiación solar** (Solar Irradiance)
+- **Corregidos SENSOR_MAPPINGS** para temperatura, humedad, presión y precipitación
+  - Ahora usan los valores correctos de la API de Euskalmet
+  - Temperatura: `measuresForAir/temperature`
+  - Humedad: `measuresForAir/humidity`
+  - Presión: `measuresForAtmosphere/pressure`
+  - Precipitación: `measuresForWater/precipitation`
+- **Configuración de iconos mejorada** para HACS
+- Total de **8 sensores meteorológicos** disponibles
+
+### Versión 0.0.1 (2025-12-06) - Versión inicial Beta
 - Lanzamiento inicial en versión beta
-- Soporte para 8 sensores meteorológicos:
+- Soporte para 6 sensores meteorológicos:
   - Temperatura (°C)
   - Humedad (%)
   - Velocidad del viento (m/s)
-  - Velocidad máxima del viento (m/s)
   - Dirección del viento (grados)
   - Presión atmosférica (hPa)
   - Precipitación acumulada (mm)
-  - Irradiación solar (W/m²)
 - Configuración basada en interfaz de usuario (UI)
 - Autenticación JWT con fingerprint y clave privada PEM
 - Traducciones completas en español y euskera

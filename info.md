@@ -1,6 +1,6 @@
 # Euskalmet - Integración para Home Assistant
 
-**Versión:** 0.0.1 (Beta)
+**Versión:** 0.0.2
 
 **Euskalmet** te permite monitorizar datos meteorológicos de las estaciones de Euskalmet (Servicio Vasco de Meteorología) directamente en Home Assistant.
 
