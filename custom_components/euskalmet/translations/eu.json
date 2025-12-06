@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Euskalmet Hassio Konfigurazioa",
+        "description": "Sartu zure Euskalmet kredentzialak",
+        "data": {
+          "fingerprint": "Fingerprint",
+          "private_key": "Gako Pribatua (PEM formatua)"
+        }
+      },
+      "station": {
+        "title": "Hautatu Meteorologia Estazioa",
+        "description": "Aukeratu jarraipena egiteko meteorologia estazioa",
+        "data": {
+          "station": "Meteorologia Estazioa"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Ezin izan da Euskalmet API-ra konektatu",
+      "invalid_auth": "API gako baliogabea",
+      "unknown": "Ustekabeko errorea gertatu da"
+    },
+    "abort": {
+      "already_configured": "Estazio hau jadanik konfiguratuta dago"
+    }
+  }
+}

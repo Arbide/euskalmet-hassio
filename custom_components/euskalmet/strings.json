@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Euskalmet Hassio Configuration",
+        "description": "Enter your Euskalmet credentials",
+        "data": {
+          "fingerprint": "Fingerprint",
+          "private_key": "Private Key (PEM format)"
+        }
+      },
+      "station": {
+        "title": "Select Weather Station",
+        "description": "Choose the weather station to monitor",
+        "data": {
+          "station": "Weather Station"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to Euskalmet API",
+      "invalid_auth": "Invalid API key",
+      "unknown": "Unexpected error occurred"
+    },
+    "abort": {
+      "already_configured": "This station is already configured"
+    }
+  }
+}
