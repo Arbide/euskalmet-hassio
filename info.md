@@ -1,8 +1,8 @@
-# Euskalmet Hassio - Integración para Home Assistant
+# Euskalmet - Integración para Home Assistant
 
 **Versión:** 0.0.1 (Beta)
 
-**Euskalmet Hassio** te permite monitorizar datos meteorológicos de las estaciones de Euskalmet (Servicio Vasco de Meteorología) directamente en Home Assistant.
+**Euskalmet** te permite monitorizar datos meteorológicos de las estaciones de Euskalmet (Servicio Vasco de Meteorología) directamente en Home Assistant.
 
 ## Qué obtienes
 

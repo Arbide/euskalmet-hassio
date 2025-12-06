@@ -1,10 +1,10 @@
-# Euskalmet Hassio - Integración para Home Assistant
+# Euskalmet - Integración para Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.1.0%2B-green.svg)
 
-Integración personalizada **Euskalmet Hassio** para Home Assistant que permite integrar datos meteorológicos de Euskalmet (Servicio Vasco de Meteorología).
+Integración personalizada **Euskalmet** para Home Assistant que permite integrar datos meteorológicos de Euskalmet (Servicio Vasco de Meteorología).
 
 **Versión actual:** 0.0.1 (Beta)
 
@@ -33,7 +33,7 @@ Integración personalizada **Euskalmet Hassio** para Home Assistant que permite 
 5. Añade la URL de este repositorio: `https://github.com/YOUR_USERNAME/euskalmet-hassio`
 6. Selecciona la categoría "Integration"
 7. Haz clic en "Añadir"
-8. Busca "Euskalmet Hassio" en HACS
+8. Busca "Euskalmet" en HACS
 9. Haz clic en "Descargar"
 10. Reinicia Home Assistant
 
@@ -61,7 +61,7 @@ Para usar esta integración, necesitas credenciales de autenticación de Euskalm
 
 1. En Home Assistant, ve a **Configuración** > **Dispositivos y Servicios**
 2. Haz clic en **Añadir Integración**
-3. Busca **Euskalmet Hassio**
+3. Busca **Euskalmet**
 4. Introduce tu **Fingerprint**
 5. Pega el contenido completo de tu **clave privada PEM** (incluyendo las líneas `-----BEGIN RSA PRIVATE KEY-----` y `-----END RSA PRIVATE KEY-----`)
 6. Selecciona tu estación meteorológica preferida de la lista desplegable

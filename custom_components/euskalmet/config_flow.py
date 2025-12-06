@@ -83,39 +83,64 @@ async def validate_credentials(
         raise CannotConnect
 
 
+async def get_station_name(
+    session: aiohttp.ClientSession, headers: dict, station_id: str
+) -> str:
+    """Get station name from API."""
+    try:
+        url = f"{API_BASE_URL}stations/{station_id}/current"
+        async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=5)) as response:
+            if response.status == 200:
+                data = await response.json()
+                if "name" in data:
+                    # Prefer Spanish name, fallback to Basque
+                    name = data["name"].get("SPANISH") or data["name"].get("BASQUE") or station_id
+                    return name
+    except Exception as err:
+        _LOGGER.debug("Could not fetch name for station %s: %s", station_id, err)
+
+    return station_id  # Fallback to ID if name not available
+
+
 async def get_stations(hass: HomeAssistant, private_key: str, fingerprint: str) -> dict[str, str]:
     """Get list of stations from API."""
     try:
         token = generate_jwt_token(private_key, fingerprint)
-        headers = {"Authorization": f"Bearer {token}"}
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+        }
         url = f"{API_BASE_URL}{API_STATIONS}"
 
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as response:
+            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=30)) as response:
                 response.raise_for_status()
                 data = await response.json()
 
                 stations = {}
-                # Parse stations from response
-                # The actual structure depends on the API response
-                # This is a simplified version that may need adjustment
-                if isinstance(data, dict) and "stations" in data:
-                    for station in data["stations"]:
-                        station_id = str(station.get("id", station.get("stationCode", "")))
-                        station_name = station.get("name", station.get("stationName", f"Station {station_id}"))
-                        if station_id:
-                            stations[station_id] = station_name
-                elif isinstance(data, list):
-                    for station in data:
-                        station_id = str(station.get("id", station.get("stationCode", "")))
-                        station_name = station.get("name", station.get("stationName", f"Station {station_id}"))
-                        if station_id:
-                            stations[station_id] = station_name
+                seen_stations = set()
+
+                # API returns a list of station entries
+                # Each station can have multiple entries (different snapshots)
+                # We need to get unique station IDs
+                if isinstance(data, list):
+                    for entry in data:
+                        station_id = entry.get("stationId")
+                        if station_id and station_id not in seen_stations:
+                            seen_stations.add(station_id)
+                            # Get station name from /current endpoint
+                            station_name = await get_station_name(session, headers, station_id)
+                            stations[station_id] = f"{station_name} ({station_id})"
+
+                            # Limit to avoid too many requests (get first 50 unique stations)
+                            if len(stations) >= 50:
+                                break
+
+                _LOGGER.info("Found %d stations", len(stations))
 
                 if not stations:
                     _LOGGER.warning("No stations found in API response")
-                    # Fallback - return a test station for development
-                    stations = {"test": "Test Station"}
+                    raise CannotConnect
 
                 return stations
 
