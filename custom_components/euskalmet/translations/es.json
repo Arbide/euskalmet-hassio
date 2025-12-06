@@ -2,7 +2,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Configuración de Euskalmet Hassio",
+        "title": "Configuración de Euskalmet",
         "description": "Introduce tus credenciales de Euskalmet",
         "data": {
           "fingerprint": "Fingerprint",

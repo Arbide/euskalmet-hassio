@@ -1,4 +1,4 @@
-# Changelog - Euskalmet Hassio
+# Changelog - Euskalmet
 
 Todos los cambios notables de este proyecto se documentarán en este archivo.
 
@@ -8,7 +8,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ## [0.0.1] - 2025-12-06
 
 ### Añadido
-- Lanzamiento inicial del componente **Euskalmet Hassio** para Home Assistant
+- Lanzamiento inicial del componente **Euskalmet** para Home Assistant
 - Integración completa con la API de Euskalmet mediante autenticación JWT
 - Soporte para 6 sensores meteorológicos:
   - Temperatura (°C)

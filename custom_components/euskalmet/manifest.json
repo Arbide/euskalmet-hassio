@@ -1,6 +1,6 @@
 {
   "domain": "euskalmet",
-  "name": "Euskalmet Hassio",
+  "name": "Euskalmet",
   "codeowners": [],
   "config_flow": true,
   "documentation": "https://opendata.euskadi.eus/api-euskalmet/",
