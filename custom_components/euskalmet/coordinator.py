@@ -26,14 +26,14 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 # Mapping of sensor types to measurement IDs and sensor types
-# This will need to be expanded as we identify more sensor types
+# Based on actual Euskalmet API response
 SENSOR_MAPPINGS = {
-    "temperature": {"measureType": "measuresForAmbient", "measure": "temp"},
-    "humidity": {"measureType": "measuresForAmbient", "measure": "hum"},
+    "temperature": {"measureType": "measuresForAir", "measure": "temperature"},
+    "humidity": {"measureType": "measuresForAir", "measure": "humidity"},
     "wind_speed": {"measureType": "measuresForWind", "measure": "mean_speed"},
     "wind_direction": {"measureType": "measuresForWind", "measure": "mean_direction"},
-    "pressure": {"measureType": "measuresForPressure", "measure": "pressure"},
-    "precipitation": {"measureType": "measuresForRain", "measure": "rain_acc"},
+    "pressure": {"measureType": "measuresForAtmosphere", "measure": "pressure"},
+    "precipitation": {"measureType": "measuresForWater", "measure": "precipitation"},
 }
 
 
@@ -193,8 +193,8 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                     meteors = sensor_details.get("meteors", [])
 
                     # Log all available meteors for debugging
-                    _LOGGER.warning(
-                        "EUSKALMET SENSOR %s - Available meteors: %s",
+                    _LOGGER.debug(
+                        "Sensor %s has meteors: %s",
                         sensor_id,
                         [(m.get("measureType"), m.get("measureId")) for m in meteors]
                     )
@@ -210,28 +210,16 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                                 measure_type == mapping["measureType"]
                                 and measure_id == mapping["measure"]
                             ):
-                                _LOGGER.warning(
-                                    "EUSKALMET MATCH: %s -> measureType=%s, measure=%s",
-                                    sensor_type,
-                                    measure_type,
-                                    measure_id,
-                                )
                                 # Fetch the reading
                                 value = await self._fetch_reading(
                                     sensor_id, measure_type, measure_id
                                 )
                                 if value is not None:
                                     processed_data[sensor_type] = value
-                                    _LOGGER.warning(
-                                        "EUSKALMET Got %s = %s from sensor %s",
+                                    _LOGGER.debug(
+                                        "Got %s = %s from sensor %s",
                                         sensor_type,
                                         value,
-                                        sensor_id,
-                                    )
-                                else:
-                                    _LOGGER.warning(
-                                        "EUSKALMET No value for %s from sensor %s",
-                                        sensor_type,
                                         sensor_id,
                                     )
 
