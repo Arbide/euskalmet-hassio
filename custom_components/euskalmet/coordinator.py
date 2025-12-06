@@ -192,6 +192,13 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                     sensor_details = await self._fetch_sensor_details(sensor_id)
                     meteors = sensor_details.get("meteors", [])
 
+                    # Log all available meteors for debugging
+                    _LOGGER.warning(
+                        "EUSKALMET SENSOR %s - Available meteors: %s",
+                        sensor_id,
+                        [(m.get("measureType"), m.get("measureId")) for m in meteors]
+                    )
+
                     # Try to match sensors to our mappings
                     for meteor in meteors:
                         measure_type = meteor.get("measureType")
@@ -203,16 +210,28 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                                 measure_type == mapping["measureType"]
                                 and measure_id == mapping["measure"]
                             ):
+                                _LOGGER.warning(
+                                    "EUSKALMET MATCH: %s -> measureType=%s, measure=%s",
+                                    sensor_type,
+                                    measure_type,
+                                    measure_id,
+                                )
                                 # Fetch the reading
                                 value = await self._fetch_reading(
                                     sensor_id, measure_type, measure_id
                                 )
                                 if value is not None:
                                     processed_data[sensor_type] = value
-                                    _LOGGER.debug(
-                                        "Got %s = %s from sensor %s",
+                                    _LOGGER.warning(
+                                        "EUSKALMET Got %s = %s from sensor %s",
                                         sensor_type,
                                         value,
+                                        sensor_id,
+                                    )
+                                else:
+                                    _LOGGER.warning(
+                                        "EUSKALMET No value for %s from sensor %s",
+                                        sensor_type,
                                         sensor_id,
                                     )
 
