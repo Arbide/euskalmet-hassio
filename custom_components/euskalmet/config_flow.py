@@ -166,6 +166,36 @@ class EuskalmetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step - credentials."""
         errors: dict[str, str] = {}
 
+        # Check if there are existing entries to reuse credentials
+        existing_entries = self.hass.config_entries.async_entries(DOMAIN)
+
+        if user_input is None and existing_entries:
+            # Reuse credentials from first existing entry
+            existing_entry = existing_entries[0]
+            self.private_key = existing_entry.data[CONF_PRIVATE_KEY]
+            self.fingerprint = existing_entry.data[CONF_FINGERPRINT]
+
+            _LOGGER.info(
+                "Reusing credentials from existing entry '%s' for new station configuration",
+                existing_entry.title
+            )
+
+            try:
+                # Fetch stations with existing credentials
+                self.stations = await get_stations(
+                    self.hass, self.private_key, self.fingerprint
+                )
+
+                # Move directly to station selection
+                return await self.async_step_station()
+
+            except (InvalidAuth, CannotConnect) as err:
+                _LOGGER.warning(
+                    "Could not reuse existing credentials: %s. Requesting new credentials.",
+                    err
+                )
+                # Fall through to show credentials form
+
         if user_input is not None:
             try:
                 # Validate credentials
@@ -195,12 +225,21 @@ class EuskalmetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
 
+        # Default values for form (use existing credentials if available)
+        default_fingerprint = ""
+        default_private_key = ""
+
+        if existing_entries and not user_input:
+            existing_entry = existing_entries[0]
+            default_fingerprint = existing_entry.data.get(CONF_FINGERPRINT, "")
+            default_private_key = existing_entry.data.get(CONF_PRIVATE_KEY, "")
+
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_FINGERPRINT): str,
-                    vol.Required(CONF_PRIVATE_KEY): TextSelector(
+                    vol.Required(CONF_FINGERPRINT, default=default_fingerprint): str,
+                    vol.Required(CONF_PRIVATE_KEY, default=default_private_key): TextSelector(
                         TextSelectorConfig(
                             multiline=True,
                         )
