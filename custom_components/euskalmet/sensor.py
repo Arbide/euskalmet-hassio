@@ -74,6 +74,7 @@ class EuskalmetSensor(CoordinatorEntity[EuskalmetDataUpdateCoordinator], SensorE
         self._attr_device_class = sensor_info.get("device_class")
         self._attr_state_class = sensor_info.get("state_class")
         self._attr_icon = sensor_info.get("icon")
+        self._attr_suggested_display_precision = sensor_info.get("suggested_display_precision")
 
         # Unique ID
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{sensor_type}"

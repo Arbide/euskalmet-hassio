@@ -31,8 +31,9 @@ JWT_AUDIENCE: Final = "met01.apikey"
 JWT_VERSION: Final = "1.0.0"
 JWT_ALGORITHM: Final = "RS256"
 
-# Update intervals
+# Update intervals (fetch data every 10 minutes)
 UPDATE_INTERVAL = timedelta(minutes=10)
+SCAN_INTERVAL = timedelta(minutes=10)
 
 # API endpoints
 API_BASE_URL: Final = "https://api.euskadi.eus/euskalmet/"
@@ -59,6 +60,7 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "state_class": SensorStateClass.MEASUREMENT,
         "unit": UnitOfTemperature.CELSIUS,
         "icon": "mdi:thermometer",
+        "suggested_display_precision": 1,
     },
     SENSOR_HUMIDITY: {
         "name": "Humidity",
@@ -66,6 +68,7 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "state_class": SensorStateClass.MEASUREMENT,
         "unit": PERCENTAGE,
         "icon": "mdi:water-percent",
+        "suggested_display_precision": 0,
     },
     SENSOR_WIND_SPEED: {
         "name": "Wind Speed",
@@ -73,6 +76,7 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "state_class": SensorStateClass.MEASUREMENT,
         "unit": UnitOfSpeed.METERS_PER_SECOND,
         "icon": "mdi:weather-windy",
+        "suggested_display_precision": 1,
     },
     SENSOR_WIND_SPEED_MAX: {
         "name": "Wind Speed Max",
@@ -80,12 +84,14 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "state_class": SensorStateClass.MEASUREMENT,
         "unit": UnitOfSpeed.METERS_PER_SECOND,
         "icon": "mdi:weather-windy-variant",
+        "suggested_display_precision": 1,
     },
     SENSOR_WIND_DIRECTION: {
         "name": "Wind Direction",
         "state_class": SensorStateClass.MEASUREMENT,
         "unit": DEGREE,
         "icon": "mdi:compass",
+        "suggested_display_precision": 0,
     },
     SENSOR_PRESSURE: {
         "name": "Pressure",
@@ -93,6 +99,7 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "state_class": SensorStateClass.MEASUREMENT,
         "unit": UnitOfPressure.HPA,
         "icon": "mdi:gauge",
+        "suggested_display_precision": 1,
     },
     SENSOR_PRECIPITATION: {
         "name": "Precipitation",
@@ -100,6 +107,7 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "state_class": SensorStateClass.TOTAL_INCREASING,
         "unit": UnitOfPrecipitationDepth.MILLIMETERS,
         "icon": "mdi:weather-rainy",
+        "suggested_display_precision": 1,
     },
     SENSOR_IRRADIANCE: {
         "name": "Solar Irradiance",
@@ -107,5 +115,6 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "state_class": SensorStateClass.MEASUREMENT,
         "unit": UnitOfIrradiance.WATTS_PER_SQUARE_METER,
         "icon": "mdi:white-balance-sunny",
+        "suggested_display_precision": 0,
     },
 }

@@ -1,12 +1,18 @@
+<div align="center">
+
+<img src="logo.png" alt="Euskalmet Logo" width="200"/>
+
 # Euskalmet - Integración para Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
-![Version](https://img.shields.io/badge/version-0.0.2-blue.svg)
+![Version](https://img.shields.io/badge/version-0.0.3-blue.svg)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.1.0%2B-green.svg)
 
-Integración personalizada **Euskalmet** para Home Assistant que permite integrar datos meteorológicos de Euskalmet (Servicio Vasco de Meteorología).
+**Integración personalizada para Home Assistant que permite integrar datos meteorológicos de Euskalmet (Servicio Vasco de Meteorología)**
 
-**Versión actual:** 0.0.2
+</div>
+
+**Versión actual:** 0.0.3
 
 ## Características
 
@@ -161,30 +167,21 @@ Esta es una integración no oficial. No está afiliada ni respaldada por Euskalm
 
 ## Registro de Cambios
 
-### Versión 0.0.2 (2025-12-06)
-- **Añadido sensor de velocidad máxima del viento** (Wind Speed Max)
-- **Añadido sensor de irradiación solar** (Solar Irradiance)
-- **Corregidos SENSOR_MAPPINGS** para temperatura, humedad, presión y precipitación
-  - Ahora usan los valores correctos de la API de Euskalmet
-  - Temperatura: `measuresForAir/temperature`
-  - Humedad: `measuresForAir/humidity`
-  - Presión: `measuresForAtmosphere/pressure`
-  - Precipitación: `measuresForWater/precipitation`
-- **Configuración de iconos mejorada** para HACS
-- Total de **8 sensores meteorológicos** disponibles
+Para ver el historial completo de cambios y versiones, consulta el archivo [CHANGELOG.md](CHANGELOG.md).
 
-### Versión 0.0.1 (2025-12-06) - Versión inicial Beta
-- Lanzamiento inicial en versión beta
-- Soporte para 6 sensores meteorológicos:
-  - Temperatura (°C)
-  - Humedad (%)
-  - Velocidad del viento (m/s)
-  - Dirección del viento (grados)
-  - Presión atmosférica (hPa)
-  - Precipitación acumulada (mm)
-- Configuración basada en interfaz de usuario (UI)
-- Autenticación JWT con fingerprint y clave privada PEM
-- Traducciones completas en español y euskera
-- Compatible con Home Assistant 2024.1.0+ (probado con 2025.11.3)
-- Actualizaciones automáticas cada 10 minutos
-- Soporte para instalación vía HACS
+---
+
+## ⚠️ Aviso Importante - Desarrollo Experimental con IA
+
+Esta integración ha sido desarrollada **casi completamente mediante Inteligencia Artificial** como experimento tecnológico.
+
+**Por favor, ten en cuenta:**
+
+- ❌ **No hay garantía de la calidad del código**
+- ❌ **No se asegura mantenimiento continuo**
+- ❌ **No se garantiza corrección de errores**
+- ❌ **El proyecto puede quedar abandonado en cualquier momento**
+
+**Usa esta integración bajo tu propio riesgo.** Se recomienda revisarla y probarla exhaustivamente antes de usarla en entornos de producción.
+
+Si encuentras problemas o deseas mejorar la integración, las contribuciones mediante Pull Requests son bienvenidas.

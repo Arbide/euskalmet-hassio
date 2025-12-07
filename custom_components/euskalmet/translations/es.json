@@ -6,7 +6,10 @@
         "description": "Introduce tus credenciales de Euskalmet",
         "data": {
           "fingerprint": "Fingerprint",
-          "private_key": "Clave Privada (formato PEM)"
+          "private_key": "Clave Privada"
+        },
+        "data_description": {
+          "private_key": "Pega tu clave privada RSA completa en formato PEM (incluyendo -----BEGIN RSA PRIVATE KEY----- y -----END RSA PRIVATE KEY-----)"
         }
       },
       "station": {

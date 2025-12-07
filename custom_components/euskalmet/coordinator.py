@@ -64,6 +64,12 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
             update_interval=UPDATE_INTERVAL,
         )
 
+        _LOGGER.info(
+            "Euskalmet coordinator initialized with update interval: %s (%.0f minutes)",
+            UPDATE_INTERVAL,
+            UPDATE_INTERVAL.total_seconds() / 60,
+        )
+
     def _generate_jwt_token(self) -> str:
         """Generate JWT token for authentication."""
         now = datetime.now(timezone.utc)
@@ -96,35 +102,73 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
         url = f"{API_BASE_URL}stations/{self.station_id}/current"
         headers = self._get_headers()
 
-        async with self._session.get(
-            url, headers=headers, timeout=aiohttp.ClientTimeout(total=30)
-        ) as response:
-            response.raise_for_status()
-            data = await response.json()
+        try:
+            async with self._session.get(
+                url, headers=headers, timeout=aiohttp.ClientTimeout(total=30)
+            ) as response:
+                response.raise_for_status()
+                data = await response.json()
 
-            # Cache station name
-            if "name" in data:
-                self.station_name = data["name"].get("SPANISH", "") or data["name"].get("BASQUE", "")
+                # Cache station name
+                if "name" in data:
+                    self.station_name = data["name"].get("SPANISH", "") or data["name"].get("BASQUE", "")
 
-            # Cache sensor information
-            if "sensors" in data:
-                for sensor_info in data["sensors"]:
-                    sensor_key = sensor_info.get("sensorKey", "").split("/")[-1]
-                    if sensor_key:
-                        self._station_sensors[sensor_key] = sensor_info
+                # Cache sensor information
+                if "sensors" in data:
+                    sensor_count = 0
+                    for sensor_info in data["sensors"]:
+                        sensor_key = sensor_info.get("sensorKey", "").split("/")[-1]
+                        if sensor_key:
+                            self._station_sensors[sensor_key] = sensor_info
+                            sensor_count += 1
 
-            return data
+                    _LOGGER.info(
+                        "Station %s initialized: '%s' with %d sensors",
+                        self.station_id, self.station_name, sensor_count
+                    )
+                else:
+                    _LOGGER.warning(
+                        "Station %s has no sensors configured",
+                        self.station_id
+                    )
+
+                return data
+        except aiohttp.ClientError as err:
+            _LOGGER.error(
+                "Network error fetching station info for %s: %s",
+                self.station_id, err
+            )
+            raise
+        except Exception as err:
+            _LOGGER.error(
+                "Unexpected error fetching station info for %s: %s",
+                self.station_id, err, exc_info=True
+            )
+            raise
 
     async def _fetch_sensor_details(self, sensor_id: str) -> dict[str, Any]:
         """Fetch sensor details to get available measures."""
         url = f"{API_BASE_URL}sensors/{sensor_id}"
         headers = self._get_headers()
 
-        async with self._session.get(
-            url, headers=headers, timeout=aiohttp.ClientTimeout(total=30)
-        ) as response:
-            response.raise_for_status()
-            return await response.json()
+        try:
+            async with self._session.get(
+                url, headers=headers, timeout=aiohttp.ClientTimeout(total=30)
+            ) as response:
+                response.raise_for_status()
+                return await response.json()
+        except aiohttp.ClientError as err:
+            _LOGGER.error(
+                "Network error fetching details for sensor '%s' from station %s: %s",
+                sensor_id, self.station_id, err
+            )
+            raise
+        except Exception as err:
+            _LOGGER.error(
+                "Unexpected error fetching details for sensor '%s' from station %s: %s",
+                sensor_id, self.station_id, err, exc_info=True
+            )
+            raise
 
     async def _fetch_reading(
         self,
@@ -150,8 +194,9 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                 url, headers=headers, timeout=aiohttp.ClientTimeout(total=30)
             ) as response:
                 if response.status != 200:
-                    _LOGGER.debug(
-                        "Failed to fetch reading from %s: %s", url, response.status
+                    _LOGGER.warning(
+                        "Failed to fetch reading for sensor '%s' (measure: %s/%s) from station %s: HTTP %s. URL: %s",
+                        sensor_id, measure_type, measure_id, self.station_id, response.status, url
                     )
                     return None
 
@@ -163,14 +208,29 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                     if value is not None:
                         return float(value)
 
+                # All values were None
+                _LOGGER.warning(
+                    "No valid data available for sensor '%s' (measure: %s/%s) from station %s. API returned all null values.",
+                    sensor_id, measure_type, measure_id, self.station_id
+                )
                 return None
 
+        except aiohttp.ClientError as err:
+            _LOGGER.error(
+                "Network error fetching reading for sensor '%s' (measure: %s/%s) from station %s: %s",
+                sensor_id, measure_type, measure_id, self.station_id, err
+            )
+            return None
         except Exception as err:
-            _LOGGER.debug("Error fetching reading: %s", err)
+            _LOGGER.error(
+                "Unexpected error fetching reading for sensor '%s' (measure: %s/%s) from station %s: %s",
+                sensor_id, measure_type, measure_id, self.station_id, err, exc_info=True
+            )
             return None
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from Euskalmet API."""
+        _LOGGER.debug("Starting data update for station %s", self.station_id)
         try:
             # First, get station information (if not cached)
             if not self._station_sensors:
@@ -226,23 +286,60 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                                         value,
                                         sensor_id,
                                     )
+                                else:
+                                    _LOGGER.info(
+                                        "Sensor type '%s' returned no data (sensor: %s, measure: %s/%s)",
+                                        sensor_type, sensor_id, measure_type, measure_id
+                                    )
 
                 except Exception as err:
-                    _LOGGER.debug(
-                        "Error processing sensor %s: %s", sensor_id, err
+                    _LOGGER.error(
+                        "Error processing sensor %s from station %s: %s",
+                        sensor_id, self.station_id, err, exc_info=True
                     )
                     continue
+
+            # Log summary of data collection
+            successful_sensors = [k for k, v in processed_data.items() if v is not None and k != "last_update"]
+            failed_sensors = [k for k, v in processed_data.items() if v is None and k != "last_update"]
+
+            if failed_sensors:
+                _LOGGER.warning(
+                    "Data update for station %s completed with missing data. Successfully retrieved: %s. Missing: %s",
+                    self.station_id, successful_sensors or "none", failed_sensors
+                )
+            else:
+                _LOGGER.info(
+                    "Data update completed successfully for station %s. All sensors retrieved: %s. Next update in %.0f minutes",
+                    self.station_id, successful_sensors, UPDATE_INTERVAL.total_seconds() / 60
+                )
 
             _LOGGER.debug("Processed data: %s", processed_data)
             return processed_data
 
         except aiohttp.ClientResponseError as err:
             if err.status == 401 or err.status == 403:
+                _LOGGER.error(
+                    "Authentication failed for station %s: HTTP %s. Please check your credentials.",
+                    self.station_id, err.status
+                )
                 raise ConfigEntryAuthFailed("Invalid credentials") from err
+            _LOGGER.error(
+                "API error for station %s: HTTP %s - %s",
+                self.station_id, err.status, err
+            )
             raise UpdateFailed(f"Error communicating with API: {err}") from err
         except aiohttp.ClientError as err:
+            _LOGGER.error(
+                "Network error communicating with API for station %s: %s",
+                self.station_id, err
+            )
             raise UpdateFailed(f"Error communicating with API: {err}") from err
         except Exception as err:
+            _LOGGER.error(
+                "Unexpected error updating data for station %s: %s",
+                self.station_id, err, exc_info=True
+            )
             raise UpdateFailed(f"Unexpected error: {err}") from err
 
     async def async_shutdown(self) -> None:

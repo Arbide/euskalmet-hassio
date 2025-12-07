@@ -5,6 +5,64 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.0.3] - 2025-12-07
+
+### Añadido
+- **Sistema de logging mejorado** para diagnóstico de problemas de lectura de datos
+  - Logs de nivel WARNING cuando la API retorna errores HTTP o valores nulos
+  - Logs de nivel ERROR para errores de red con detalles completos
+  - Logs informativos al inicializar estaciones (nombre y número de sensores)
+  - Resumen al final de cada actualización indicando sensores exitosos y fallidos
+  - Stack traces completos para errores inesperados
+- **SCAN_INTERVAL** añadido a constantes (`const.py`) para claridad
+- **Descripciones de ayuda** (`data_description`) en flujo de configuración para el campo de clave privada
+  - Español: Instrucciones detalladas sobre formato PEM
+  - Euskera: Instrucciones traducidas
+  - Inglés: Instrucciones en inglés
+- **Logo de Euskalmet** añadido a la cabecera del README.md con diseño centrado
+- **Aviso sobre desarrollo experimental con IA** al final del README
+
+### Mejorado
+- **Lista de estaciones completa** en configuración
+  - Eliminado límite de 50 estaciones
+  - Ahora se muestran TODAS las estaciones disponibles
+  - Optimización: se muestran IDs inicialmente para evitar peticiones HTTP masivas
+  - El nombre real se obtiene solo cuando se selecciona una estación
+- **Campo de clave privada más grande** en el flujo de configuración
+  - Cambiado a área de texto multilínea sin restricciones de tipo
+  - Mejor experiencia de usuario al pegar claves PEM largas
+- **Precisión de visualización ajustada** para todos los sensores:
+  - Humedad: 0 decimales (antes: sin definir)
+  - Precipitación: 1 decimal (antes: sin definir)
+  - Presión: 1 decimal (antes: sin definir)
+  - Dirección del viento: 0 decimales (antes: sin definir)
+  - Velocidad del viento: 1 decimal (antes: sin definir)
+  - Velocidad máxima del viento: 1 decimal (antes: sin definir)
+  - Temperatura: 1 decimal (antes: sin definir)
+  - Irradiancia solar: 0 decimales (antes: sin definir)
+- **README.md reorganizado**:
+  - Registro de cambios movido a referencia a CHANGELOG.md
+  - Estructura más limpia y mantenible
+  - Diseño visual mejorado con logo centrado
+
+### Corregido
+- **Configuración de HACS** - Eliminada referencia a `"filename": "logo.png"`
+  - Los iconos locales no funcionan en HACS/Home Assistant
+  - Para iconos oficiales se requiere PR al repositorio home-assistant/brands
+  - El logo permanece en README.md para visualización en GitHub
+
+### Eliminado
+- Importación innecesaria de `TextSelectorType` en `config_flow.py`
+- Línea `"filename": "logo.png"` de `hacs.json`
+
+### Técnico
+- Manejo de errores mejorado en `coordinator.py`:
+  - `_fetch_station_info()`: Manejo de errores de red con logs detallados
+  - `_fetch_sensor_details()`: Distinción entre errores de red y otros errores
+  - `_fetch_reading()`: Tres tipos de errores diferenciados (HTTP, red, inesperados)
+  - `_async_update_data()`: Resumen estadístico de sensores exitosos vs fallidos
+- Logs informativos al inicializar coordinador con intervalo de actualización configurado
+
 ## [0.0.2] - 2025-12-06
 
 ### Añadido
@@ -88,4 +146,6 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Los nombres de las medidas (measureType/measureId) pueden necesitar ajustes según las estaciones
 - No todas las estaciones tienen todos los sensores disponibles
 
+[0.0.3]: https://github.com/YOUR_USERNAME/euskalmet-hassio/releases/tag/v0.0.3
+[0.0.2]: https://github.com/YOUR_USERNAME/euskalmet-hassio/releases/tag/v0.0.2
 [0.0.1]: https://github.com/YOUR_USERNAME/euskalmet-hassio/releases/tag/v0.0.1

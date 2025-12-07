@@ -6,7 +6,10 @@
         "description": "Sartu zure Euskalmet kredentzialak",
         "data": {
           "fingerprint": "Fingerprint",
-          "private_key": "Gako Pribatua (PEM formatua)"
+          "private_key": "Gako Pribatua"
+        },
+        "data_description": {
+          "private_key": "Itsatsi zure RSA gako pribatu osoa PEM formatuan (-----BEGIN RSA PRIVATE KEY----- eta -----END RSA PRIVATE KEY----- barne)"
         }
       },
       "station": {

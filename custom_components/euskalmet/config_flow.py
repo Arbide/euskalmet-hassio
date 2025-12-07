@@ -19,7 +19,6 @@ from homeassistant.helpers.selector import (
     SelectSelectorMode,
     TextSelector,
     TextSelectorConfig,
-    TextSelectorType,
 )
 
 from .const import (
@@ -128,13 +127,9 @@ async def get_stations(hass: HomeAssistant, private_key: str, fingerprint: str) 
                         station_id = entry.get("stationId")
                         if station_id and station_id not in seen_stations:
                             seen_stations.add(station_id)
-                            # Get station name from /current endpoint
-                            station_name = await get_station_name(session, headers, station_id)
-                            stations[station_id] = f"{station_name} ({station_id})"
-
-                            # Limit to avoid too many requests (get first 50 unique stations)
-                            if len(stations) >= 50:
-                                break
+                            # Show station ID initially to avoid too many API requests
+                            # The actual name will be fetched when the station is selected
+                            stations[station_id] = station_id
 
                 _LOGGER.info("Found %d stations", len(stations))
 
@@ -207,7 +202,6 @@ class EuskalmetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(CONF_FINGERPRINT): str,
                     vol.Required(CONF_PRIVATE_KEY): TextSelector(
                         TextSelectorConfig(
-                            type=TextSelectorType.TEXT,
                             multiline=True,
                         )
                     ),
@@ -224,7 +218,17 @@ class EuskalmetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             station_id = user_input[CONF_STATION]
-            station_name = self.stations.get(station_id, "Unknown Station")
+
+            # Fetch the actual station name now that a station has been selected
+            try:
+                token = generate_jwt_token(self.private_key, self.fingerprint)
+                headers = {"Authorization": f"Bearer {token}"}
+
+                async with aiohttp.ClientSession() as session:
+                    station_name = await get_station_name(session, headers, station_id)
+            except Exception as err:
+                _LOGGER.warning("Could not fetch station name: %s", err)
+                station_name = station_id
 
             # Create unique ID
             await self.async_set_unique_id(f"{DOMAIN}_{station_id}")
