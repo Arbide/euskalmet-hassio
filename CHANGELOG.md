@@ -163,7 +163,6 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Los nombres de las medidas (measureType/measureId) pueden necesitar ajustes según las estaciones
 - No todas las estaciones tienen todos los sensores disponibles
 
-[0.0.4]: https://github.com/Arbide/euskalmet-hassio/releases/tag/v0.0.4
 [0.0.3]: https://github.com/Arbide/euskalmet-hassio/releases/tag/v0.0.3
 [0.0.2]: https://github.com/Arbide/euskalmet-hassio/releases/tag/v0.0.2
 [0.0.1]: https://github.com/Arbide/euskalmet-hassio/releases/tag/v0.0.1
