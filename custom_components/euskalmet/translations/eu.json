@@ -14,7 +14,7 @@
       },
       "station": {
         "title": "Hautatu Meteorologia Estazioa",
-        "description": "Aukeratu jarraipena egiteko meteorologia estazioa",
+        "description": "Aukeratu jarraipena egiteko meteorologia estazioa. Zein estazio erabili identifikatzen laguntzeko, eskuragarri dauden estazioak kontsultatu ditzakezu hemen: https://www.euskalmet.euskadi.eus/observacion/datos-de-estaciones/",
         "data": {
           "station": "Meteorologia Estazioa"
         }

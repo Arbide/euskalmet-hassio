@@ -14,7 +14,7 @@
       },
       "station": {
         "title": "Select Weather Station",
-        "description": "Choose the weather station to monitor",
+        "description": "Choose the weather station to monitor. To help identify which station to use, you can check the available stations at https://www.euskalmet.euskadi.eus/observacion/datos-de-estaciones/",
         "data": {
           "station": "Weather Station"
         }

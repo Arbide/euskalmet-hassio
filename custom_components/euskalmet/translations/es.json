@@ -14,7 +14,7 @@
       },
       "station": {
         "title": "Seleccionar Estación Meteorológica",
-        "description": "Elige la estación meteorológica a monitorizar",
+        "description": "Elige la estación meteorológica a monitorizar. Para ayudarte a identificar qué estación usar, puedes consultar las estaciones disponibles en https://www.euskalmet.euskadi.eus/observacion/datos-de-estaciones/",
         "data": {
           "station": "Estación Meteorológica"
         }
