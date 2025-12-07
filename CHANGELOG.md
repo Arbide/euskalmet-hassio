@@ -5,6 +5,23 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.0.4] - 2025-12-07
+
+### Añadido
+- **Texto de ayuda en la selección de estación** - Añadido texto informativo en la pantalla de selección de estación que guía al usuario sobre cómo identificar qué estación usar, con enlace a https://www.euskalmet.euskadi.eus/observacion/datos-de-estaciones/
+  - Traducido en español (es)
+  - Traducido en euskera (eu)
+  - Traducido en inglés (en)
+- **Reutilización de credenciales** - Al añadir una nueva estación, el flujo de configuración reutiliza automáticamente las credenciales (fingerprint y clave privada) de una configuración existente, evitando tener que introducirlas nuevamente
+
+### Mejorado
+- **Creación de sensores optimizada** - Ahora solo se crean los sensores que realmente existen para la estación seleccionada, en lugar de crear todos los sensores por defecto. Esto evita sensores sin datos y mejora el rendimiento
+- Experiencia de usuario mejorada en el flujo de configuración con información contextual más clara
+
+### Corregido
+- **Error 404 en cambios de hora** - Ajustada la hora de recuperación de datos para evitar errores 404 cuando se producen cambios de hora (horario de verano/invierno). La integración ahora maneja correctamente las transiciones horarias
+- **Nombre del repositorio** corregido en las referencias internas
+
 ## [0.0.3] - 2025-12-07
 
 ### Añadido
@@ -146,6 +163,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Los nombres de las medidas (measureType/measureId) pueden necesitar ajustes según las estaciones
 - No todas las estaciones tienen todos los sensores disponibles
 
+[0.0.4]: https://github.com/Arbide/euskalmet-hassio/releases/tag/v0.0.4
 [0.0.3]: https://github.com/Arbide/euskalmet-hassio/releases/tag/v0.0.3
 [0.0.2]: https://github.com/Arbide/euskalmet-hassio/releases/tag/v0.0.2
 [0.0.1]: https://github.com/Arbide/euskalmet-hassio/releases/tag/v0.0.1
