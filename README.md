@@ -5,14 +5,14 @@
 # Euskalmet - Integración para Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
-![Version](https://img.shields.io/badge/version-0.0.3-blue.svg)
+![Version](https://img.shields.io/badge/version-0.0.4-blue.svg)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.1.0%2B-green.svg)
 
 **Integración personalizada para Home Assistant que permite integrar datos meteorológicos de Euskalmet (Servicio Vasco de Meteorología)**
 
 </div>
 
-**Versión actual:** 0.0.3
+**Versión actual:** 0.0.4
 
 ## Características
 
