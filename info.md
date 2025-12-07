@@ -25,4 +25,4 @@ Necesitas credenciales de autenticación de Euskalmet (fingerprint y clave priva
 
 ## Más Información
 
-Para documentación detallada, solución de problemas y ejemplos, por favor visita el [repositorio de GitHub](https://github.com/YOUR_USERNAME/euskalmet-hassio).
+Para documentación detallada, solución de problemas y ejemplos, por favor visita el [repositorio de GitHub](https://github.com/Arbide/euskalmet-hassio).

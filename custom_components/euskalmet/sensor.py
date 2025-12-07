@@ -35,18 +35,30 @@ async def async_setup_entry(
     coordinator: EuskalmetDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
     station_id = entry.data[CONF_STATION]
 
+    # Wait for first update to detect available sensors
+    await coordinator.async_config_entry_first_refresh()
+
     entities = []
 
-    # Create sensor entities for each sensor type
-    for sensor_type, sensor_info in SENSOR_TYPES.items():
-        entities.append(
-            EuskalmetSensor(
-                coordinator,
-                station_id,
-                sensor_type,
-                sensor_info,
+    # Create sensor entities only for available sensor types
+    for sensor_type in coordinator.available_sensor_types:
+        if sensor_type in SENSOR_TYPES:
+            sensor_info = SENSOR_TYPES[sensor_type]
+            entities.append(
+                EuskalmetSensor(
+                    coordinator,
+                    station_id,
+                    sensor_type,
+                    sensor_info,
+                )
             )
-        )
+
+    _LOGGER.info(
+        "Created %d sensor entities for station %s: %s",
+        len(entities),
+        station_id,
+        list(coordinator.available_sensor_types),
+    )
 
     async_add_entities(entities)
 

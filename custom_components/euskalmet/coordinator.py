@@ -56,6 +56,7 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
         self.station_name = ""
         self._session = aiohttp.ClientSession()
         self._station_sensors = {}  # Cache of sensor information
+        self.available_sensor_types = set()  # Types of sensors available in this station
 
         super().__init__(
             hass,
@@ -177,7 +178,7 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
         measure_id: str,
     ) -> float | None:
         """Fetch a specific reading from the API."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc) - timedelta(minutes=10)
         year = now.year
         month = str(now.month).zfill(2)
         day = str(now.day).zfill(2)
@@ -280,6 +281,7 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                                 )
                                 if value is not None:
                                     processed_data[sensor_type] = value
+                                    self.available_sensor_types.add(sensor_type)
                                     _LOGGER.debug(
                                         "Got %s = %s from sensor %s",
                                         sensor_type,

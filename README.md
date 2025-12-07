@@ -38,7 +38,7 @@
 2. Haz clic en "Integraciones"
 3. Haz clic en los tres puntos en la esquina superior derecha
 4. Selecciona "Repositorios personalizados"
-5. Añade la URL de este repositorio: `https://github.com/YOUR_USERNAME/euskalmet-hassio`
+5. Añade la URL de este repositorio: `https://github.com/Arbide/euskalmet-hassio`
 6. Selecciona la categoría "Integration"
 7. Haz clic en "Añadir"
 8. Busca "Euskalmet" en HACS
