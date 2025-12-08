@@ -5,6 +5,31 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.0.5] - 2025-12-08
+
+### Añadido
+- **Sensores de niveles de agua** - Añadidos tres nuevos sensores para medir niveles de agua en estaciones hidrológicas:
+  - `sheet_level_1` - Nivel de agua 1 (measuresForWater/sheet_level_1)
+  - `sheet_level_2` - Nivel de agua 2 (measuresForWater/sheet_level_2)
+  - `sheet_level_3` - Nivel de agua 3 (measuresForWater/sheet_level_3)
+  - Unidad: metros (m)
+  - Device class: DISTANCE
+  - Precisión: 2 decimales
+  - Icono: mdi:waves
+- **Sensores de caudal** - Añadidos dos nuevos sensores para medir caudales calculados:
+  - `flow_1_computed` - Caudal 1 (measuresForWater/flow_1_computed)
+  - `flow_2_computed` - Caudal 2 (measuresForWater/flow_2_computed)
+  - Unidad: m³/h (metros cúbicos por hora)
+  - Precisión: 2 decimales
+  - Icono: mdi:waves-arrow-right
+
+### Mejorado
+- **Selección de estaciones ordenada alfabéticamente** - El combo de selección de estaciones ahora muestra:
+  - Estaciones ordenadas alfabéticamente por nombre
+  - Formato: "Nombre de la Estación (CÓDIGO)"
+  - Mejora significativa en la experiencia de usuario para encontrar estaciones
+  - Los nombres se obtienen dinámicamente de la API durante la configuración
+
 ## [0.0.4] - 2025-12-07
 
 ### Añadido

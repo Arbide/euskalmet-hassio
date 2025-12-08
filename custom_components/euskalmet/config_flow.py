@@ -118,6 +118,7 @@ async def get_stations(hass: HomeAssistant, private_key: str, fingerprint: str) 
 
                 stations = {}
                 seen_stations = set()
+                station_list = []
 
                 # API returns a list of station entries
                 # Each station can have multiple entries (different snapshots)
@@ -127,11 +128,25 @@ async def get_stations(hass: HomeAssistant, private_key: str, fingerprint: str) 
                         station_id = entry.get("stationId")
                         if station_id and station_id not in seen_stations:
                             seen_stations.add(station_id)
-                            # Show station ID initially to avoid too many API requests
-                            # The actual name will be fetched when the station is selected
-                            stations[station_id] = station_id
+                            station_list.append(station_id)
 
-                _LOGGER.info("Found %d stations", len(stations))
+                _LOGGER.info("Found %d unique stations, fetching names...", len(station_list))
+
+                # Fetch names for all stations
+                station_names = {}
+                for station_id in station_list:
+                    station_name = await get_station_name(session, headers, station_id)
+                    station_names[station_id] = station_name
+
+                # Sort stations alphabetically by name
+                sorted_stations = sorted(station_names.items(), key=lambda x: x[1].lower())
+
+                # Create dictionary with format "Name (CODE)"
+                for station_id, station_name in sorted_stations:
+                    display_name = f"{station_name} ({station_id})"
+                    stations[station_id] = display_name
+
+                _LOGGER.info("Stations loaded and sorted: %d stations", len(stations))
 
                 if not stations:
                     _LOGGER.warning("No stations found in API response")

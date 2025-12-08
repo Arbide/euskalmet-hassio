@@ -10,10 +10,12 @@ from homeassistant.const import (
     DEGREE,
     PERCENTAGE,
     UnitOfIrradiance,
+    UnitOfLength,
     UnitOfPressure,
     UnitOfSpeed,
     UnitOfTemperature,
     UnitOfPrecipitationDepth,
+    UnitOfVolumeFlowRate,
 )
 
 DOMAIN: Final = "euskalmet"
@@ -51,6 +53,11 @@ SENSOR_WIND_DIRECTION = "wind_direction"
 SENSOR_PRESSURE = "pressure"
 SENSOR_PRECIPITATION = "precipitation"
 SENSOR_IRRADIANCE = "irradiance"
+SENSOR_SHEET_LEVEL_1 = "sheet_level_1"
+SENSOR_SHEET_LEVEL_2 = "sheet_level_2"
+SENSOR_SHEET_LEVEL_3 = "sheet_level_3"
+SENSOR_FLOW_1 = "flow_1_computed"
+SENSOR_FLOW_2 = "flow_2_computed"
 
 # Sensor definitions
 SENSOR_TYPES: Final[dict[str, dict]] = {
@@ -116,5 +123,43 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "unit": UnitOfIrradiance.WATTS_PER_SQUARE_METER,
         "icon": "mdi:white-balance-sunny",
         "suggested_display_precision": 0,
+    },
+    SENSOR_SHEET_LEVEL_1: {
+        "name": "Water Level 1",
+        "device_class": SensorDeviceClass.DISTANCE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfLength.METERS,
+        "icon": "mdi:waves",
+        "suggested_display_precision": 2,
+    },
+    SENSOR_SHEET_LEVEL_2: {
+        "name": "Water Level 2",
+        "device_class": SensorDeviceClass.DISTANCE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfLength.METERS,
+        "icon": "mdi:waves",
+        "suggested_display_precision": 2,
+    },
+    SENSOR_SHEET_LEVEL_3: {
+        "name": "Water Level 3",
+        "device_class": SensorDeviceClass.DISTANCE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfLength.METERS,
+        "icon": "mdi:waves",
+        "suggested_display_precision": 2,
+    },
+    SENSOR_FLOW_1: {
+        "name": "Flow Rate 1",
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
+        "icon": "mdi:waves-arrow-right",
+        "suggested_display_precision": 2,
+    },
+    SENSOR_FLOW_2: {
+        "name": "Flow Rate 2",
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
+        "icon": "mdi:waves-arrow-right",
+        "suggested_display_precision": 2,
     },
 }

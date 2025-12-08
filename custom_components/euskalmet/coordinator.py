@@ -36,6 +36,11 @@ SENSOR_MAPPINGS = {
     "pressure": {"measureType": "measuresForAtmosphere", "measure": "pressure"},
     "precipitation": {"measureType": "measuresForWater", "measure": "precipitation"},
     "irradiance": {"measureType": "measuresForSun", "measure": "irradiance"},
+    "sheet_level_1": {"measureType": "measuresForWater", "measure": "sheet_level_1"},
+    "sheet_level_2": {"measureType": "measuresForWater", "measure": "sheet_level_2"},
+    "sheet_level_3": {"measureType": "measuresForWater", "measure": "sheet_level_3"},
+    "flow_1_computed": {"measureType": "measuresForWater", "measure": "flow_1_computed"},
+    "flow_2_computed": {"measureType": "measuresForWater", "measure": "flow_2_computed"},
 }
 
 
@@ -247,6 +252,11 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                 "pressure": None,
                 "precipitation": None,
                 "irradiance": None,
+                "sheet_level_1": None,
+                "sheet_level_2": None,
+                "sheet_level_3": None,
+                "flow_1_computed": None,
+                "flow_2_computed": None,
                 "last_update": datetime.now(timezone.utc).isoformat(),
             }
 
