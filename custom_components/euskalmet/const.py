@@ -151,14 +151,14 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
     SENSOR_FLOW_1: {
         "name": "Flow Rate 1",
         "state_class": SensorStateClass.MEASUREMENT,
-        "unit": UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
+        "unit": UnitOfVolumeFlowRate.CUBIC_METERS_PER_SECOND,
         "icon": "mdi:waves-arrow-right",
         "suggested_display_precision": 2,
     },
     SENSOR_FLOW_2: {
         "name": "Flow Rate 2",
         "state_class": SensorStateClass.MEASUREMENT,
-        "unit": UnitOfVolumeFlowRate.CUBIC_METERS_PER_HOUR,
+        "unit": UnitOfVolumeFlowRate.CUBIC_METERS_PER_SECOND,
         "icon": "mdi:waves-arrow-right",
         "suggested_display_precision": 2,
     },
