@@ -24,6 +24,7 @@ ATTRIBUTION: Final = "Data provided by Euskalmet"
 
 # Configuration
 CONF_STATION = "station"
+CONF_LOCATION = "location"
 CONF_PRIVATE_KEY = "private_key"
 CONF_FINGERPRINT = "fingerprint"
 
@@ -37,12 +38,24 @@ JWT_ALGORITHM: Final = "RS256"
 UPDATE_INTERVAL = timedelta(minutes=10)
 SCAN_INTERVAL = timedelta(minutes=10)
 
+# Weather update interval (longer than sensors - weather forecasts don't change as frequently)
+WEATHER_UPDATE_INTERVAL = timedelta(minutes=30)
+
 # API endpoints
 API_BASE_URL: Final = "https://api.euskadi.eus/euskalmet/"
 API_STATIONS: Final = "stations"
 API_MEASURES: Final = "measures"
 API_READINGS: Final = "readings"
 API_SENSORS: Final = "sensors"
+
+# Weather API endpoints
+API_GEO_REGIONS: Final = "geo/regions"
+API_GEO_ZONES: Final = "geo/regions/{region_id}/zones"
+API_GEO_LOCATIONS: Final = "geo/regions/{region_id}/zones/{zone_id}/locations"
+API_WEATHER_FORECAST: Final = "weather/regions/{region_id}/zones/{zone_id}/locations/{location_id}/forecast/at/{year}/{month:02d}/{day:02d}/for/{for_year}{for_month:02d}{for_day:02d}"
+API_WEATHER_TRENDS: Final = "weather/regions/{region_id}/zones/{zone_id}/locations/{location_id}/forecast/trends/at/{year}/{month:02d}/{day:02d}/for/{for_year}{for_month:02d}{for_day:02d}"
+API_WEATHER_HOURLY: Final = "weather/regions/{region_id}/zones/{zone_id}/locations/{location_id}/forecast/trends/measures/at/{year}/{month:02d}/{day:02d}/for/{for_year}{for_month:02d}{for_day:02d}"
+API_WEATHER_REPORT: Final = "weather/regions/{region_id}/zones/{zone_id}/locations/{location_id}/reports/for/{year}/{month:02d}/{day:02d}/last"
 
 # Sensor types
 SENSOR_TEMPERATURE = "temperature"
@@ -162,4 +175,50 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "icon": "mdi:waves-arrow-right",
         "suggested_display_precision": 2,
     },
+}
+
+# Weather condition mapping from Euskalmet codes to Home Assistant standard conditions
+# Based on API exploration and Euskalmet icon codes
+# Reference: https://www.euskalmet.euskadi.eus/media/assets/icons/euskalmet/
+WEATHER_CONDITION_MAP: Final[dict[str, str]] = {
+    # Clear / Despejado
+    "00": "sunny",  # Despejado / Oskarbi (day will be handled by entity)
+
+    # Cloudy / Nuboso
+    "01": "partlycloudy",  # Poco nuboso / Hodei gutxi
+    "02": "partlycloudy",  # Nuboso / Partially cloudy
+    "03": "cloudy",  # Muy nuboso / Very cloudy
+    "04": "cloudy",  # Cubierto / Overcast
+
+    # Fog / Niebla
+    "05": "fog",  # Niebla / Fog
+    "06": "fog",  # Niebla dispersa / Scattered fog
+    "07": "fog",  # Niebla en bancos / Fog banks
+    "08": "fog",  # Niebla y niebla helada / Fog and freezing fog
+    "09": "fog",  # Bruma / Mist
+
+    # Rain / Lluvia
+    "10": "rainy",  # Chubascos débiles / Zaparrada txikiak (light showers)
+    "11": "rainy",  # Chubascos / Showers
+    "12": "rainy",  # Lluvia débil / Euri txikia (light rain)
+    "13": "rainy",  # Lluvia / Rain
+    "14": "pouring",  # Lluvia fuerte / Heavy rain
+
+    # Snow / Nieve
+    "15": "snowy",  # Nieve débil / Light snow
+    "16": "snowy",  # Nieve / Snow
+    "17": "snowy",  # Nieve fuerte / Heavy snow
+
+    # Storms / Tormentas
+    "18": "lightning",  # Tormenta débil / Light storm
+    "19": "lightning-rainy",  # Tormenta / Storm
+    "20": "lightning-rainy",  # Tormenta fuerte / Heavy storm
+
+    # Mixed / Mezclado
+    "21": "snowy-rainy",  # Aguanieve / Sleet
+    "22": "hail",  # Granizo / Hail
+
+    # Wind / Viento
+    "23": "windy",  # Viento fuerte / Strong wind
+    "24": "exceptional",  # Viento muy fuerte / Very strong wind
 }

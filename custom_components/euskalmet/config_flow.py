@@ -24,9 +24,13 @@ from homeassistant.helpers.selector import (
 from .const import (
     API_BASE_URL,
     API_STATIONS,
+    API_GEO_REGIONS,
+    API_GEO_ZONES,
+    API_GEO_LOCATIONS,
     CONF_PRIVATE_KEY,
     CONF_FINGERPRINT,
     CONF_STATION,
+    CONF_LOCATION,
     DOMAIN,
     JWT_ISSUER,
     JWT_AUDIENCE,
@@ -164,6 +168,115 @@ async def get_stations(hass: HomeAssistant, private_key: str, fingerprint: str) 
         raise CannotConnect
 
 
+async def get_locations(
+    hass: HomeAssistant, private_key: str, fingerprint: str
+) -> dict[str, dict[str, str]]:
+    """Fetch available locations from API.
+
+    Returns:
+        Dict of location_id: {
+            "name": "Location Name",
+            "region_id": "region_id",
+            "zone_id": "zone_id",
+            "display_name": "Location (Zone / Region)"
+        }
+    """
+    try:
+        token = generate_jwt_token(private_key, fingerprint)
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+        }
+
+        locations = {}
+
+        async with aiohttp.ClientSession() as session:
+            # Get regions
+            regions_url = f"{API_BASE_URL}{API_GEO_REGIONS}"
+            async with session.get(
+                regions_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)
+            ) as response:
+                response.raise_for_status()
+                regions_data = await response.json()
+
+            # For each region, get zones
+            for region in regions_data:
+                region_id = region.get("regionId")
+                if not region_id:
+                    continue
+
+                # Skip non-basque_country regions for now
+                if region_id != "basque_country":
+                    continue
+
+                zones_url = f"{API_BASE_URL}{API_GEO_ZONES.format(region_id=region_id)}"
+                async with session.get(
+                    zones_url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)
+                ) as response:
+                    response.raise_for_status()
+                    zones_data = await response.json()
+
+                # For each zone, get locations
+                for zone in zones_data:
+                    zone_id = zone.get("regionZoneId")
+                    if not zone_id:
+                        continue
+
+                    locations_url = f"{API_BASE_URL}{API_GEO_LOCATIONS.format(region_id=region_id, zone_id=zone_id)}"
+                    async with session.get(
+                        locations_url,
+                        headers=headers,
+                        timeout=aiohttp.ClientTimeout(total=10),
+                    ) as response:
+                        response.raise_for_status()
+                        locations_data = await response.json()
+
+                    # Process locations
+                    for location in locations_data:
+                        location_id = location.get("regionZoneLocationId")
+                        if not location_id:
+                            continue
+
+                        # Format zone and region names for display
+                        zone_name = zone_id.replace("_", " ").title()
+                        region_name = region_id.replace("_", " ").title()
+                        location_name = location_id.replace("_", " ").title()
+
+                        # Special cases for known locations
+                        location_name_map = {
+                            "bilbao": "Bilbao",
+                            "donostia": "Donostia-San Sebastián",
+                            "vitoria-gasteiz": "Vitoria-Gasteiz",
+                            "getxo": "Getxo",
+                            "durango": "Durango",
+                        }
+                        location_name = location_name_map.get(
+                            location_id, location_name
+                        )
+
+                        locations[location_id] = {
+                            "name": location_name,
+                            "region_id": region_id,
+                            "zone_id": zone_id,
+                            "display_name": f"{location_name} ({zone_name})",
+                        }
+
+            if not locations:
+                _LOGGER.warning("No locations found in API response")
+                raise CannotConnect
+
+            return locations
+
+    except InvalidAuth:
+        raise
+    except aiohttp.ClientError as err:
+        _LOGGER.error("Error fetching locations: %s", err)
+        raise CannotConnect
+    except Exception as err:
+        _LOGGER.error("Unexpected error fetching locations: %s", err)
+        raise CannotConnect
+
+
 class EuskalmetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Euskalmet."""
 
@@ -174,11 +287,21 @@ class EuskalmetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.private_key: str | None = None
         self.fingerprint: str | None = None
         self.stations: dict[str, str] = {}
+        self.locations: dict[str, dict[str, str]] = {}
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Handle the initial step - credentials."""
+        """Show menu for configuration type."""
+        return self.async_show_menu(
+            step_id="user",
+            menu_options=["station_config", "weather_config"],
+        )
+
+    async def async_step_station_config(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the station configuration step - credentials."""
         errors: dict[str, str] = {}
 
         # Check if there are existing entries to reuse credentials
@@ -250,13 +373,154 @@ class EuskalmetConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             default_private_key = existing_entry.data.get(CONF_PRIVATE_KEY, "")
 
         return self.async_show_form(
-            step_id="user",
+            step_id="station_config",
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_FINGERPRINT, default=default_fingerprint): str,
                     vol.Required(CONF_PRIVATE_KEY, default=default_private_key): TextSelector(
                         TextSelectorConfig(
                             multiline=True,
+                        )
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_weather_config(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the weather configuration step - credentials."""
+        errors: dict[str, str] = {}
+
+        # Check if there are existing entries to reuse credentials
+        existing_entries = self.hass.config_entries.async_entries(DOMAIN)
+
+        if user_input is None and existing_entries:
+            # Reuse credentials from first existing entry
+            existing_entry = existing_entries[0]
+            self.private_key = existing_entry.data[CONF_PRIVATE_KEY]
+            self.fingerprint = existing_entry.data[CONF_FINGERPRINT]
+
+            _LOGGER.info(
+                "Reusing credentials from existing entry '%s' for weather configuration",
+                existing_entry.title
+            )
+
+            try:
+                # Fetch locations with existing credentials
+                self.locations = await get_locations(
+                    self.hass, self.private_key, self.fingerprint
+                )
+
+                # Move directly to location selection
+                return await self.async_step_location()
+
+            except (InvalidAuth, CannotConnect) as err:
+                _LOGGER.warning(
+                    "Could not reuse existing credentials: %s. Requesting new credentials.",
+                    err
+                )
+                # Fall through to show credentials form
+
+        if user_input is not None:
+            try:
+                # Validate credentials
+                if await validate_credentials(
+                    self.hass,
+                    user_input[CONF_PRIVATE_KEY],
+                    user_input[CONF_FINGERPRINT]
+                ):
+                    self.private_key = user_input[CONF_PRIVATE_KEY]
+                    self.fingerprint = user_input[CONF_FINGERPRINT]
+
+                    # Fetch locations
+                    self.locations = await get_locations(
+                        self.hass, self.private_key, self.fingerprint
+                    )
+
+                    # Move to location selection
+                    return await self.async_step_location()
+                else:
+                    errors["base"] = "invalid_auth"
+
+            except InvalidAuth:
+                errors["base"] = "invalid_auth"
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+
+        # Default values for form (use existing credentials if available)
+        default_fingerprint = ""
+        default_private_key = ""
+
+        if existing_entries and not user_input:
+            existing_entry = existing_entries[0]
+            default_fingerprint = existing_entry.data.get(CONF_FINGERPRINT, "")
+            default_private_key = existing_entry.data.get(CONF_PRIVATE_KEY, "")
+
+        return self.async_show_form(
+            step_id="weather_config",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_FINGERPRINT, default=default_fingerprint): str,
+                    vol.Required(CONF_PRIVATE_KEY, default=default_private_key): TextSelector(
+                        TextSelectorConfig(
+                            multiline=True,
+                        )
+                    ),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_location(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the location selection step."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            location_id = user_input[CONF_LOCATION]
+            location_info = self.locations[location_id]
+
+            # Create unique ID
+            await self.async_set_unique_id(f"{DOMAIN}_weather_{location_id}")
+            self._abort_if_unique_id_configured()
+
+            return self.async_create_entry(
+                title=f"Euskalmet Weather - {location_info['name']}",
+                data={
+                    CONF_PRIVATE_KEY: self.private_key,
+                    CONF_FINGERPRINT: self.fingerprint,
+                    CONF_LOCATION: location_id,
+                    "location_name": location_info["name"],
+                    "region_id": location_info["region_id"],
+                    "zone_id": location_info["zone_id"],
+                },
+            )
+
+        # Create options for selector - sorted alphabetically
+        sorted_locations = sorted(
+            self.locations.items(),
+            key=lambda x: x[1]["display_name"]
+        )
+
+        location_options = [
+            {"label": info["display_name"], "value": location_id}
+            for location_id, info in sorted_locations
+        ]
+
+        return self.async_show_form(
+            step_id="location",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_LOCATION): SelectSelector(
+                        SelectSelectorConfig(
+                            options=location_options,
+                            mode=SelectSelectorMode.DROPDOWN,
                         )
                     ),
                 }

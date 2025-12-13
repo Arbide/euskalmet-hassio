@@ -2,11 +2,29 @@
   "config": {
     "step": {
       "user": {
-        "title": "Euskalmet Konfigurazioa",
-        "description": "Sartu zure Euskalmet kredentzialak",
+        "title": "Hautatu Konfigurazio Mota",
+        "menu_options": {
+          "station_config": "Konfiguratu Meteo Estazioa",
+          "weather_config": "Konfiguratu Eguraldia Iragarpena"
+        }
+      },
+      "station_config": {
+        "title": "Euskalmet Estazioa",
+        "description": "Sartu zure Euskalmet API kredentzialak",
         "data": {
-          "fingerprint": "Fingerprint",
-          "private_key": "Gako Pribatua"
+          "fingerprint": "Hatz-marka",
+          "private_key": "Gako pribatua"
+        },
+        "data_description": {
+          "private_key": "Itsatsi zure RSA gako pribatu osoa PEM formatuan (-----BEGIN RSA PRIVATE KEY----- eta -----END RSA PRIVATE KEY----- barne)"
+        }
+      },
+      "weather_config": {
+        "title": "Euskalmet Eguraldia Iragarpena",
+        "description": "Sartu zure Euskalmet API kredentzialak",
+        "data": {
+          "fingerprint": "Hatz-marka",
+          "private_key": "Gako pribatua"
         },
         "data_description": {
           "private_key": "Itsatsi zure RSA gako pribatu osoa PEM formatuan (-----BEGIN RSA PRIVATE KEY----- eta -----END RSA PRIVATE KEY----- barne)"
@@ -18,6 +36,13 @@
         "data": {
           "station": "Meteorologia Estazioa"
         }
+      },
+      "location": {
+        "title": "Hautatu Kokapena",
+        "description": "Aukeratu kokapena eguraldi iragarpenerako",
+        "data": {
+          "location": "Kokapena"
+        }
       }
     },
     "error": {
@@ -26,7 +51,7 @@
       "unknown": "Ustekabeko errorea gertatu da"
     },
     "abort": {
-      "already_configured": "Estazio hau jadanik konfiguratuta dago"
+      "already_configured": "Gailua dagoeneko konfiguratuta dago"
     }
   }
 }

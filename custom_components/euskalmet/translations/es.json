@@ -2,11 +2,29 @@
   "config": {
     "step": {
       "user": {
-        "title": "Configuración de Euskalmet",
-        "description": "Introduce tus credenciales de Euskalmet",
+        "title": "Seleccionar Tipo de Configuración",
+        "menu_options": {
+          "station_config": "Configurar Estación Meteorológica",
+          "weather_config": "Configurar Pronóstico del Tiempo"
+        }
+      },
+      "station_config": {
+        "title": "Estación Euskalmet",
+        "description": "Introduce tus credenciales de la API de Euskalmet",
         "data": {
-          "fingerprint": "Fingerprint",
-          "private_key": "Clave Privada"
+          "fingerprint": "Huella digital",
+          "private_key": "Clave privada"
+        },
+        "data_description": {
+          "private_key": "Pega tu clave privada RSA completa en formato PEM (incluyendo -----BEGIN RSA PRIVATE KEY----- y -----END RSA PRIVATE KEY-----)"
+        }
+      },
+      "weather_config": {
+        "title": "Pronóstico del Tiempo Euskalmet",
+        "description": "Introduce tus credenciales de la API de Euskalmet",
+        "data": {
+          "fingerprint": "Huella digital",
+          "private_key": "Clave privada"
         },
         "data_description": {
           "private_key": "Pega tu clave privada RSA completa en formato PEM (incluyendo -----BEGIN RSA PRIVATE KEY----- y -----END RSA PRIVATE KEY-----)"
@@ -18,6 +36,13 @@
         "data": {
           "station": "Estación Meteorológica"
         }
+      },
+      "location": {
+        "title": "Seleccionar Ubicación",
+        "description": "Elige una ubicación para los pronósticos del tiempo",
+        "data": {
+          "location": "Ubicación"
+        }
       }
     },
     "error": {
@@ -26,7 +51,7 @@
       "unknown": "Error inesperado"
     },
     "abort": {
-      "already_configured": "Esta estación ya está configurada"
+      "already_configured": "Este dispositivo ya está configurado"
     }
   }
 }
