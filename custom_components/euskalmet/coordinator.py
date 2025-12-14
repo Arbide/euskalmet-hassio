@@ -41,6 +41,12 @@ SENSOR_MAPPINGS = {
     "sheet_level_3": {"measureType": "measuresForWater", "measure": "sheet_level_3"},
     "flow_1_computed": {"measureType": "measuresForWater", "measure": "flow_1_computed"},
     "flow_2_computed": {"measureType": "measuresForWater", "measure": "flow_2_computed"},
+    "max_wave_height": {"measureType": "measuresForWaves", "measure": "max_wave_height"},
+    "significant_height": {"measureType": "measuresForWaves", "measure": "significant_height"},
+    "surf_period": {"measureType": "measuresForWaves", "measure": "surf_period"},
+    "peak_period": {"measureType": "measuresForWaves", "measure": "peak_period"},
+    "speed_sigma": {"measureType": "measuresForWind", "measure": "speed_sigma"},
+    "direction_sigma": {"measureType": "measuresForWind", "measure": "direction_sigma"},
 }
 
 

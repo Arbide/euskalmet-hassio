@@ -5,6 +5,39 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.1.0] - 2025-12-12
+
+### Añadido
+- **Entidad Weather** - Nueva plataforma weather para pronósticos meteorológicos
+  - Pronóstico diario con temperaturas (máxima/mínima), condiciones, precipitación y viento
+  - Pronóstico horario con datos detallados de temperatura, viento, precipitación y humedad
+  - Condiciones meteorológicas actuales desde API de pronóstico
+  - Configuración separada por ubicación (no vinculada a estaciones)
+  - Actualización automática cada 30 minutos
+  - Soporte para 236+ ubicaciones en el País Vasco
+
+- **Selección de ubicación** - Nuevo flujo de configuración para ubicaciones de pronóstico
+  - Menú inicial para elegir: estación meteorológica o pronóstico del tiempo
+  - Selección de ubicación desde jerarquía región/zona/ubicación
+  - Reutilización automática de credenciales si ya existen configuraciones previas
+  - Ubicaciones ordenadas alfabéticamente con zona entre paréntesis
+
+- **Mapeo de condiciones meteorológicas** - Condiciones de Euskalmet mapeadas a estándares de Home Assistant
+  - Soporte para 25 códigos de condiciones diferentes
+  - Incluye: despejado, nuboso, niebla, lluvia, nieve, tormentas, viento, aguanieve, granizo
+  - Diferenciación día/noche para condición "despejado"
+  - Condiciones desconocidas se muestran como "exceptional" con advertencia en log
+
+- **Sensores de oleaje** - Añadidos cuatro nuevos sensores para medición de oleaje en estaciones costeras:
+  - `max_wave_height` - Altura máxima de ola (measuresForWaves/max_wave_height)
+  - `significant_height` - Altura significativa de ola (measuresForWaves/significant_height)
+  - `surf_period` - Periodo de ola (measuresForWaves/surf_period)
+  - `peak_period` - Periodo pico de ola (measuresForWaves/peak_period)
+
+- **Sensores de desviación estándar del viento (Sigma)** - Añadidos dos nuevos sensores para variabilidad del viento:
+  - `speed_sigma` - Desviación estándar de velocidad del viento (measuresForWind/speed_sigma)
+  - `direction_sigma` - Desviación estándar de dirección del viento (measuresForWind/direction_sigma)
+
 ## [0.0.5] - 2025-12-08
 
 ### Añadido
@@ -29,6 +62,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
   - Formato: "Nombre de la Estación (CÓDIGO)"
   - Mejora significativa en la experiencia de usuario para encontrar estaciones
   - Los nombres se obtienen dinámicamente de la API durante la configuración
+
+### Corregido
+- **Corregida unidad de caudal a m³/s** - Los sensores de caudal (`flow_1_computed` y `flow_2_computed`) ahora usan la unidad correcta m³/s (metros cúbicos por segundo) en lugar de m³/h
 
 ## [0.0.4] - 2025-12-07
 

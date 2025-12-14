@@ -14,6 +14,7 @@ from homeassistant.const import (
     UnitOfPressure,
     UnitOfSpeed,
     UnitOfTemperature,
+    UnitOfTime,
     UnitOfPrecipitationDepth,
     UnitOfVolumeFlowRate,
 )
@@ -71,6 +72,12 @@ SENSOR_SHEET_LEVEL_2 = "sheet_level_2"
 SENSOR_SHEET_LEVEL_3 = "sheet_level_3"
 SENSOR_FLOW_1 = "flow_1_computed"
 SENSOR_FLOW_2 = "flow_2_computed"
+SENSOR_MAX_WAVE_HEIGHT = "max_wave_height"
+SENSOR_SIGNIFICANT_WAVE_HEIGHT = "significant_height"
+SENSOR_SURF_PERIOD = "surf_period"
+SENSOR_PEAK_PERIOD = "peak_period"
+SENSOR_WIND_SPEED_SIGMA = "speed_sigma"
+SENSOR_WIND_DIRECTION_SIGMA = "direction_sigma"
 
 # Sensor definitions
 SENSOR_TYPES: Final[dict[str, dict]] = {
@@ -174,6 +181,53 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "unit": UnitOfVolumeFlowRate.CUBIC_METERS_PER_SECOND,
         "icon": "mdi:waves-arrow-right",
         "suggested_display_precision": 2,
+    },
+    SENSOR_MAX_WAVE_HEIGHT: {
+        "name": "Max Wave Height",
+        "device_class": SensorDeviceClass.DISTANCE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfLength.METERS,
+        "icon": "mdi:wave",
+        "suggested_display_precision": 2,
+    },
+    SENSOR_SIGNIFICANT_WAVE_HEIGHT: {
+        "name": "Significant Wave Height",
+        "device_class": SensorDeviceClass.DISTANCE,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfLength.METERS,
+        "icon": "mdi:wave",
+        "suggested_display_precision": 2,
+    },
+    SENSOR_SURF_PERIOD: {
+        "name": "Wave Period",
+        "device_class": SensorDeviceClass.DURATION,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfTime.SECONDS,
+        "icon": "mdi:timer-outline",
+        "suggested_display_precision": 1,
+    },
+    SENSOR_PEAK_PERIOD: {
+        "name": "Wave Peak Period",
+        "device_class": SensorDeviceClass.DURATION,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfTime.SECONDS,
+        "icon": "mdi:timer-outline",
+        "suggested_display_precision": 1,
+    },
+    SENSOR_WIND_SPEED_SIGMA: {
+        "name": "Wind Speed Sigma",
+        "device_class": SensorDeviceClass.WIND_SPEED,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfSpeed.KILOMETERS_PER_HOUR,
+        "icon": "mdi:sigma",
+        "suggested_display_precision": 1,
+    },
+    SENSOR_WIND_DIRECTION_SIGMA: {
+        "name": "Wind Direction Sigma",
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": DEGREE,
+        "icon": "mdi:sigma",
+        "suggested_display_precision": 0,
     },
 }
 

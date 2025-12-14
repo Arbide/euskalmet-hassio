@@ -222,17 +222,20 @@ Configurado via `hacs.json`:
 - **Type hints**: Mantener anotaciones de tipos completas (compatibilidad Python 3.11+)
 - **Sensor genérico**: `sensor.py` es completamente genérico y no requiere cambios al añadir sensores
 
+## Agentes
+* Todos los documentos o tests creados por el agente se almacencarán en la carpeta `agent/`.º
+
 ## Resumen de Workflow
 
 1. Usuario solicita cambio
 2. Implementar cambio en archivos correspondientes
-3. **Actualizar CHANGELOG.md** con descripción del cambio
-4. Si aplica, actualizar traducciones (3 idiomas)
-5. Si es cambio mayor, considerar incremento de versión
-6. Verificar que no se rompe funcionalidad existente
+3. **Actualizar CHANGELOG.md** con descripción del cambio, pero sin incluir detalles técnicos ni información sobre documentacion generada
+4. Actualizar README.md e info.md si es necesario tras un cambio
+5. Si aplica, actualizar traducciones (3 idiomas)
+6. Si es cambio mayor, considerar incremento de versión
+7. Verificar que no se rompe funcionalidad existente
 
 ---
 
-**Versión actual**: 0.0.5
 **Home Assistant mínimo**: 2024.1.0
 **Python mínimo**: 3.11
