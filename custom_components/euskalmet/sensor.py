@@ -6,6 +6,7 @@ import logging
 from typing import Any
 
 from homeassistant.components.sensor import (
+    DOMAIN as SENSOR_DOMAIN,
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
@@ -14,6 +15,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import slugify
 
 from .const import (
     ATTRIBUTION,
@@ -21,7 +23,11 @@ from .const import (
     DOMAIN,
     SENSOR_TYPES,
 )
-from .coordinator import EuskalmetDataUpdateCoordinator
+from .coordinator import (
+    DATA_ATTRIBUTES,
+    DATA_LAST_RESET,
+    EuskalmetDataUpdateCoordinator,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -91,6 +97,12 @@ class EuskalmetSensor(CoordinatorEntity[EuskalmetDataUpdateCoordinator], SensorE
         # Unique ID
         self._attr_unique_id = f"{DOMAIN}_{station_id}_{sensor_type}"
 
+        # Suggested entity_id (sensor.euskalmet_c0b1_precipitation_today), so it
+        # follows the pattern even if the device was renamed. Home Assistant only
+        # uses it when the entity is registered for the first time.
+        if sensor_info.get("force_entity_id"):
+            self.entity_id = f"{SENSOR_DOMAIN}.{DOMAIN}_{slugify(station_id)}_{sensor_type}"
+
         # Device info for grouping sensors
         self._attr_device_info = {
             "identifiers": {(DOMAIN, station_id)},
@@ -145,7 +157,19 @@ class EuskalmetSensor(CoordinatorEntity[EuskalmetDataUpdateCoordinator], SensorE
             if self.coordinator.station_name:
                 attributes["station_name"] = self.coordinator.station_name
 
+            # Add sensor specific attributes (e.g. time of the precipitation readings)
+            attributes.update(
+                self.coordinator.data.get(DATA_ATTRIBUTES, {}).get(self._sensor_type, {})
+            )
+
         return attributes
+
+    @property
+    def last_reset(self) -> datetime | None:
+        """Return the start of the accumulation period (state class total)."""
+        if self.coordinator.data is None:
+            return None
+        return self.coordinator.data.get(DATA_LAST_RESET, {}).get(self._sensor_type)
 
     @property
     def available(self) -> bool:

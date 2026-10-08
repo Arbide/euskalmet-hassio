@@ -5,6 +5,22 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.2.0] - 2026-10-08
+
+### Añadido
+- **Lluvia del día** - Nuevo sensor `sensor.euskalmet_<estación>_precipitation_today` con la lluvia acumulada del día, sumando todas las lecturas de 10 minutos que Euskalmet asigna a ese día (de 00:00 a 23:50), igual que sus totales oficiales. Es la fuente correcta para gráficos y estadísticas: usa la estadística *change* por hora, día o mes
+  - Después de medianoche sigue mostrando el total del día anterior hasta incluir su última lectura (23:50), como máximo hasta la 01:00, para que el día quede completo en las estadísticas
+  - Si la API falla nunca publica 0: conserva el último valor válido y pasa a no disponible si el fallo dura más de una hora
+  - Atributos `day`, `readings_count` y `last_reading_time`
+- **Lluvia de la última hora** - Nuevo sensor `sensor.euskalmet_<estación>_precipitation_last_hour` con la lluvia de los últimos 60 minutos (las 6 últimas lecturas publicadas) y atributos `from` y `to`
+- **Hora de la lectura** - El sensor de precipitación de 10 minutos incluye el atributo `reading_time` con la hora del tramo de Euskalmet al que corresponde el valor (fin del intervalo de 10 minutos)
+
+### Corregido
+- **Lluvia perdida o duplicada** - Cuando Euskalmet publicaba una lectura con retraso, la integración podía saltársela o leer dos veces la misma, y los totales no coincidían con los oficiales. Ahora se recogen todas las lecturas del día, sin huecos ni repeticiones
+- **Estadísticas del sensor de precipitación de 10 minutos** - `sensor.euskalmet_<estación>_precipitation` pasa de `total_increasing` a `measurement`: su valor sube y baja, y Home Assistant tomaba cada bajada como un reinicio de contador, así que sus estadísticas no eran válidas
+  - Si Home Assistant muestra un aviso en *Herramientas para desarrolladores → Estadísticas*, pulsa *Arreglar*
+  - Las estadísticas del nuevo sensor de lluvia del día empiezan a contar desde la actualización
+
 ## [0.1.0] - 2025-12-12
 
 ### Añadido

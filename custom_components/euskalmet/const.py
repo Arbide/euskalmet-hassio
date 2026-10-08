@@ -42,6 +42,9 @@ SCAN_INTERVAL = timedelta(minutes=10)
 # Weather update interval (longer than sensors - weather forecasts don't change as frequently)
 WEATHER_UPDATE_INTERVAL = timedelta(minutes=30)
 
+# Simultaneous requests when downloading the missing hours of the day's precipitation
+PRECIPITATION_PARALLEL_REQUESTS = 4
+
 # API endpoints
 API_BASE_URL: Final = "https://api.euskadi.eus/euskalmet/"
 API_STATIONS: Final = "stations"
@@ -66,6 +69,8 @@ SENSOR_WIND_SPEED_MAX = "wind_speed_max"
 SENSOR_WIND_DIRECTION = "wind_direction"
 SENSOR_PRESSURE = "pressure"
 SENSOR_PRECIPITATION = "precipitation"
+SENSOR_PRECIPITATION_TODAY = "precipitation_today"
+SENSOR_PRECIPITATION_LAST_HOUR = "precipitation_last_hour"
 SENSOR_IRRADIANCE = "irradiance"
 SENSOR_SHEET_LEVEL_1 = "sheet_level_1"
 SENSOR_SHEET_LEVEL_2 = "sheet_level_2"
@@ -128,13 +133,35 @@ SENSOR_TYPES: Final[dict[str, dict]] = {
         "icon": "mdi:gauge",
         "suggested_display_precision": 1,
     },
+    # Rain of the latest 10-minute slot: it goes up and down, it is not a counter
     SENSOR_PRECIPITATION: {
         "name": "Precipitation",
         "device_class": SensorDeviceClass.PRECIPITATION,
-        "state_class": SensorStateClass.TOTAL_INCREASING,
+        "state_class": SensorStateClass.MEASUREMENT,
         "unit": UnitOfPrecipitationDepth.MILLIMETERS,
         "icon": "mdi:weather-rainy",
         "suggested_display_precision": 1,
+    },
+    # Rain of the local day. TOTAL with last_reset (not TOTAL_INCREASING) because
+    # Euskalmet may correct readings down, which must not look like a counter reset.
+    # force_entity_id: suggest sensor.euskalmet_<station>_<type> on first registration.
+    SENSOR_PRECIPITATION_TODAY: {
+        "name": "Precipitation Today",
+        "device_class": SensorDeviceClass.PRECIPITATION,
+        "state_class": SensorStateClass.TOTAL,
+        "unit": UnitOfPrecipitationDepth.MILLIMETERS,
+        "icon": "mdi:weather-pouring",
+        "suggested_display_precision": 1,
+        "force_entity_id": True,
+    },
+    SENSOR_PRECIPITATION_LAST_HOUR: {
+        "name": "Precipitation Last Hour",
+        "device_class": SensorDeviceClass.PRECIPITATION,
+        "state_class": SensorStateClass.MEASUREMENT,
+        "unit": UnitOfPrecipitationDepth.MILLIMETERS,
+        "icon": "mdi:weather-rainy",
+        "suggested_display_precision": 1,
+        "force_entity_id": True,
     },
     SENSOR_IRRADIANCE: {
         "name": "Solar Irradiance",

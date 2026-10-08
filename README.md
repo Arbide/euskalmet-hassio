@@ -3,12 +3,12 @@
 # Euskalmet - Integración para Home Assistant
 
 [![HACS Supported](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2024.1.0%2B-green.svg)
 
 **Integración personalizada para Home Assistant que permite integrar datos meteorológicos de Euskalmet (Servicio Vasco de Meteorología)**
 
-**Versión actual:** 0.1.0
+**Versión actual:** 0.2.0
 
 ## Características
 
@@ -29,7 +29,7 @@
   - Temperatura (°C)
   - Humedad (%)
   - Presión atmosférica (hPa)
-  - Precipitación (mm)
+  - Precipitación (mm): últimos 10 minutos, última hora y acumulada del día
   - Irradiación solar (W/m²)
 
   **Viento:**
@@ -142,7 +142,9 @@ La integración crea los siguientes sensores para cada estación configurada (se
 | **Atmosféricos** | Temperature | Temperatura actual | °C |
 | | Humidity | Humedad relativa | % |
 | | Pressure | Presión atmosférica | hPa |
-| | Precipitation | Precipitación acumulada | mm |
+| | Precipitation | Lluvia de los últimos 10 minutos (última lectura de Euskalmet) | mm |
+| | Precipitation Last Hour | Lluvia de los últimos 60 minutos (6 últimas lecturas) | mm |
+| | Precipitation Today | Lluvia acumulada del día | mm |
 | | Solar Irradiance | Irradiación solar | W/m² |
 | **Viento** | Wind Speed | Velocidad media del viento | m/s |
 | | Wind Speed Max | Velocidad máxima del viento | m/s |
@@ -164,7 +166,41 @@ La integración crea los siguientes sensores para cada estación configurada (se
 Cada sensor incluye atributos adicionales:
 - `station_id`: ID de la estación meteorológica
 - `station_name`: Nombre de la estación meteorológica
-- `last_update`: Marca de tiempo de la última actualización de datos
+- `last_update`: Hora de la última consulta a la API (no de la lectura)
+
+Los sensores de precipitación añaden:
+- **Precipitation**: `reading_time`, hora del tramo de 10 minutos de Euskalmet al que corresponde el valor. Euskalmet etiqueta cada tramo con la hora de **fin** del intervalo: el valor de las 19:20 es la lluvia de 19:10 a 19:20
+- **Precipitation Last Hour**: `from` y `to`, inicio y fin de los 60 minutos sumados (por ejemplo, de 18:20 a 19:20 suma los tramos de 18:30 a 19:20), y `readings_count`
+- **Precipitation Today**: `day` (fecha del total), `readings_count` (lecturas sumadas), `last_reading_time` (último tramo incluido) y `last_reset` (medianoche del día)
+
+### Precipitación: qué sensor usar
+
+Euskalmet publica la lluvia en tramos de 10 minutos, con unos minutos de retraso. A partir de ellos, la integración ofrece tres sensores por estación:
+
+- `sensor.euskalmet_<estación>_precipitation`: lluvia del último tramo de 10 minutos publicado. Es una medida instantánea (`state_class: measurement`): sirve para ver si está lloviendo y con qué intensidad, pero **no la sumes** para calcular totales.
+- `sensor.euskalmet_<estación>_precipitation_last_hour`: lluvia de los 60 minutos que terminan en el último tramo publicado (no en la hora del reloj).
+- `sensor.euskalmet_<estación>_precipitation_today`: lluvia acumulada del día. Suma todas las lecturas que Euskalmet asigna a ese día (tramos de 00:00 a 23:50, hora local), así que coincide con sus totales diarios oficiales. Se recalcula entero en cada actualización, por lo que una actualización perdida o una lectura repetida no altera el total.
+
+**Para lluvia por hora, día o mes, usa `precipitation_today` con estadísticas de tipo *change*.** Es un sensor `state_class: total` con `last_reset` a medianoche, así que Home Assistant calcula correctamente la lluvia de cualquier periodo:
+
+```yaml
+type: statistics-graph
+title: Lluvia diaria
+entities:
+  - sensor.euskalmet_STATION_ID_precipitation_today
+stat_types:
+  - change
+period: day   # o hour, week, month
+chart_type: bar
+days_to_show: 30
+```
+
+Detalles del acumulado diario:
+- Después de medianoche sigue mostrando el total del día anterior hasta incluir su última lectura (tramo de las 23:50, que Euskalmet publica pasada la medianoche), como máximo hasta la 01:00. Así ese día queda completo en las estadísticas; esas últimas lecturas cuentan en la primera hora del día siguiente, pero los totales semanales y mensuales son exactos.
+- Si la API falla, nunca publica 0: mantiene el último valor válido y, si el fallo dura más de una hora, el sensor pasa a no disponible.
+- Para tenerlo al día, en cada actualización se consultan la hora actual y la anterior (una consulta más que antes) y, al arrancar, las horas ya transcurridas del día.
+
+**Actualización desde la versión 0.1.0:** el sensor de 10 minutos pasa de `total_increasing` a `measurement`, porque sus estadísticas anteriores no eran válidas. Si Home Assistant muestra un aviso en *Herramientas para desarrolladores → Estadísticas*, pulsa *Arreglar*. Las estadísticas de `precipitation_today` empiezan a contar desde la actualización.
 
 ## Ejemplo de Uso
 

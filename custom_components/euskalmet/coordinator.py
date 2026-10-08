@@ -12,18 +12,41 @@ from homeassistant.helpers.update_coordinator import (
     UpdateFailed,
 )
 from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.util import dt as dt_util
 
 from .const import (
     API_BASE_URL,
     DOMAIN,
+    PRECIPITATION_PARALLEL_REQUESTS,
+    SENSOR_PRECIPITATION,
+    SENSOR_PRECIPITATION_LAST_HOUR,
+    SENSOR_PRECIPITATION_TODAY,
     UPDATE_INTERVAL,
     JWT_ISSUER,
     JWT_AUDIENCE,
     JWT_VERSION,
     JWT_ALGORITHM,
 )
+from .precipitation import (
+    DayTotal,
+    PrecipitationAccumulator,
+    floor_to_hour,
+    parse_hour,
+)
 
 _LOGGER = logging.getLogger(__name__)
+
+# Keys of the coordinator data that are not sensor values
+DATA_ATTRIBUTES = "attributes"  # extra state attributes by sensor type
+DATA_LAST_RESET = "last_reset"  # last_reset by sensor type (state class total)
+META_KEYS = ("last_update", DATA_ATTRIBUTES, DATA_LAST_RESET)
+
+# Sensors computed from the 10-minute precipitation readings
+PRECIPITATION_SENSOR_TYPES = (
+    SENSOR_PRECIPITATION,
+    SENSOR_PRECIPITATION_TODAY,
+    SENSOR_PRECIPITATION_LAST_HOUR,
+)
 
 # Mapping of sensor types to measurement IDs and sensor types
 # Based on actual Euskalmet API response
@@ -68,6 +91,9 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
         self._session = aiohttp.ClientSession()
         self._station_sensors = {}  # Cache of sensor information
         self.available_sensor_types = set()  # Types of sensors available in this station
+        # 10-minute precipitation readings of the current and previous day, by sensor
+        self._precipitation: dict[str, PrecipitationAccumulator] = {}
+        self._precipitation_day: dict[str, DayTotal] = {}  # last reported daily total
 
         super().__init__(
             hass,
@@ -240,6 +266,140 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
             )
             return None
 
+    async def _fetch_precipitation_hour(
+        self,
+        sensor_id: str,
+        measure_type: str,
+        measure_id: str,
+        hour: datetime,
+    ) -> dict[datetime, float | None] | None:
+        """Fetch the 10-minute precipitation slots of one UTC hour.
+
+        Returns an empty dict when the hour has no data (HTTP 404, e.g. the
+        current hour before its first slot) and None when the request failed.
+        """
+        url = (
+            f"{API_BASE_URL}readings/forStation/{self.station_id}/{sensor_id}/"
+            f"measures/{measure_type}/{measure_id}/at/{hour:%Y/%m/%d/%H}"
+        )
+        headers = self._get_headers()
+
+        try:
+            async with self._session.get(
+                url, headers=headers, timeout=aiohttp.ClientTimeout(total=30)
+            ) as response:
+                if response.status == 404:
+                    if hour < floor_to_hour(datetime.now(timezone.utc)):
+                        _LOGGER.warning(
+                            "No precipitation readings for station %s at %s (HTTP 404)",
+                            self.station_id, hour.isoformat()
+                        )
+                    return {}
+                if response.status != 200:
+                    _LOGGER.warning(
+                        "Failed to fetch precipitation readings for sensor '%s' from station %s at %s: HTTP %s. URL: %s",
+                        sensor_id, self.station_id, hour.isoformat(), response.status, url
+                    )
+                    return None
+                return parse_hour(await response.json(), hour)
+
+        except (aiohttp.ClientError, TimeoutError) as err:
+            _LOGGER.error(
+                "Network error fetching precipitation readings for sensor '%s' from station %s at %s: %s",
+                sensor_id, self.station_id, hour.isoformat(), err
+            )
+            return None
+        except Exception as err:
+            _LOGGER.error(
+                "Unexpected error fetching precipitation readings for sensor '%s' from station %s at %s: %s",
+                sensor_id, self.station_id, hour.isoformat(), err, exc_info=True
+            )
+            return None
+
+    async def _update_precipitation(
+        self,
+        sensor_id: str,
+        measure_type: str,
+        measure_id: str,
+        processed_data: dict[str, Any],
+    ) -> None:
+        """Update the 10-minute, last-hour and daily precipitation values.
+
+        Totals are recomputed from every stored 10-minute slot of the day, so a
+        missed poll or a slot read twice does not change them.
+        """
+        accumulator = self._precipitation.setdefault(
+            sensor_id, PrecipitationAccumulator()
+        )
+        tz = dt_util.DEFAULT_TIME_ZONE
+
+        async def fetch(hour: datetime) -> dict[datetime, float | None] | None:
+            return await self._fetch_precipitation_hour(
+                sensor_id, measure_type, measure_id, hour
+            )
+
+        snapshot = await accumulator.update(
+            dt_util.now(tz), tz, fetch, PRECIPITATION_PARALLEL_REQUESTS
+        )
+
+        if accumulator.readings:
+            self.available_sensor_types.update(PRECIPITATION_SENSOR_TYPES)
+
+        attributes = processed_data[DATA_ATTRIBUTES]
+
+        if snapshot.latest is None:
+            _LOGGER.info(
+                "Sensor type '%s' returned no recent data (sensor: %s, measure: %s/%s)",
+                SENSOR_PRECIPITATION, sensor_id, measure_type, measure_id
+            )
+            return
+
+        processed_data[SENSOR_PRECIPITATION] = snapshot.latest.value
+        attributes[SENSOR_PRECIPITATION] = {
+            # Euskalmet slot label: end of the 10-minute interval
+            "reading_time": dt_util.as_local(snapshot.latest.time).isoformat(),
+        }
+
+        if snapshot.last_hour is not None:
+            processed_data[SENSOR_PRECIPITATION_LAST_HOUR] = snapshot.last_hour.total
+            attributes[SENSOR_PRECIPITATION_LAST_HOUR] = {
+                "from": dt_util.as_local(snapshot.last_hour.start).isoformat(),
+                "to": dt_util.as_local(snapshot.last_hour.end).isoformat(),
+                "readings_count": snapshot.last_hour.readings_count,
+            }
+
+        today = snapshot.today
+        if today is not None:
+            processed_data[SENSOR_PRECIPITATION_TODAY] = today.total
+            processed_data[DATA_LAST_RESET][SENSOR_PRECIPITATION_TODAY] = (
+                snapshot.today_reset
+            )
+            attributes[SENSOR_PRECIPITATION_TODAY] = {
+                "day": today.day.isoformat(),
+                "readings_count": today.readings_count,
+                "last_reading_time": (
+                    dt_util.as_local(today.last_reading_time).isoformat()
+                    if today.last_reading_time is not None
+                    else None
+                ),
+            }
+            previous = self._precipitation_day.get(sensor_id)
+            if previous is not None and previous.day != today.day:
+                _LOGGER.info(
+                    "Precipitation of %s at station %s: %.1f mm (%d readings)",
+                    previous.day.isoformat(), self.station_id,
+                    previous.total, previous.readings_count
+                )
+            self._precipitation_day[sensor_id] = today
+
+        _LOGGER.debug(
+            "Precipitation at station %s: %s mm at %s, last hour %s mm, day %s: %s mm (%s readings)",
+            self.station_id, snapshot.latest.value, snapshot.latest.time.isoformat(),
+            snapshot.last_hour.total if snapshot.last_hour else None,
+            today.day if today else None, today.total if today else None,
+            today.readings_count if today else None
+        )
+
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch data from Euskalmet API."""
         _LOGGER.debug("Starting data update for station %s", self.station_id)
@@ -257,13 +417,18 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                 "wind_direction": None,
                 "pressure": None,
                 "precipitation": None,
+                "precipitation_today": None,
+                "precipitation_last_hour": None,
                 "irradiance": None,
                 "sheet_level_1": None,
                 "sheet_level_2": None,
                 "sheet_level_3": None,
                 "flow_1_computed": None,
                 "flow_2_computed": None,
+                # Time of this poll (not of the readings)
                 "last_update": datetime.now(timezone.utc).isoformat(),
+                DATA_ATTRIBUTES: {},
+                DATA_LAST_RESET: {},
             }
 
             # For each cached sensor, try to get readings
@@ -291,6 +456,13 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                                 measure_type == mapping["measureType"]
                                 and measure_id == mapping["measure"]
                             ):
+                                if sensor_type == SENSOR_PRECIPITATION:
+                                    # Accumulated from every 10-minute slot, not just the latest
+                                    await self._update_precipitation(
+                                        sensor_id, measure_type, measure_id, processed_data
+                                    )
+                                    continue
+
                                 # Fetch the reading
                                 value = await self._fetch_reading(
                                     sensor_id, measure_type, measure_id
@@ -318,8 +490,8 @@ class EuskalmetDataUpdateCoordinator(DataUpdateCoordinator):
                     continue
 
             # Log summary of data collection
-            successful_sensors = [k for k, v in processed_data.items() if v is not None and k != "last_update"]
-            failed_sensors = [k for k, v in processed_data.items() if v is None and k != "last_update"]
+            successful_sensors = [k for k, v in processed_data.items() if v is not None and k not in META_KEYS]
+            failed_sensors = [k for k, v in processed_data.items() if v is None and k not in META_KEYS]
 
             if failed_sensors:
                 _LOGGER.warning(

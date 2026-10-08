@@ -1,6 +1,6 @@
 # Euskalmet - Integración para Home Assistant
 
-**Versión:** 0.1.0
+**Versión:** 0.2.0
 
 **Euskalmet** te permite monitorizar datos meteorológicos de las estaciones de Euskalmet (Servicio Vasco de Meteorología) directamente en Home Assistant.
 
@@ -19,7 +19,7 @@
   - Temperatura, humedad, presión atmosférica
   - Velocidad del viento (media y máxima) con desviación estándar (sigma)
   - Dirección del viento con desviación estándar (sigma)
-  - Precipitación
+  - Precipitación: últimos 10 minutos, última hora y acumulada del día (coincide con los totales diarios oficiales de Euskalmet)
   - Irradiación solar
   - Niveles de agua (3 sensores)
   - Caudal (2 sensores)
